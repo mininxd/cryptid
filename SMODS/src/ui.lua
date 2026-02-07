@@ -518,7 +518,9 @@ function create_UIBox_Other_GameObjects()
     if #other_collections_tabs > 0 then
         for _, gameobject_tabs in ipairs(other_collections_tabs) do
             table.insert(custom_gameobject_tabs[curr_col], gameobject_tabs)
-            curr_height = curr_height + gameobject_tabs.nodes[1].config.minh
+            if gameobject_tabs.nodes and gameobject_tabs.nodes[1] and gameobject_tabs.nodes[1].config then
+                curr_height = curr_height + gameobject_tabs.nodes[1].config.minh
+            end
             if curr_height > 6 then --TODO: Verify that this is the ideal number
                 curr_height = 0
                 curr_col = curr_col + 1
@@ -862,7 +864,9 @@ end
 local UIBox_button_ref = UIBox_button
 function UIBox_button(args)
     local button = UIBox_button_ref(args)
-    button.nodes[1].config.count = args.count
+    if button and button.nodes and button.nodes[1] and button.nodes[1].config then
+        button.nodes[1].config.count = args.count
+    end
     return button
 end
 
@@ -1509,22 +1513,26 @@ function create_UIBox_main_menu_buttons()
         scale = 0.45 * 1.2
     })
     local menu = create_UIBox_main_menu_buttonsRef()
-    table.insert(menu.nodes[1].nodes[1].nodes, modsButton)
-    menu.nodes[1].nodes[1].config = {align = "cm", padding = 0.15, r = 0.1, emboss = 0.1, colour = G.C.L_BLACK, mid = true}
-    if SMODS.mod_button_alert then
-        G.E_MANAGER:add_event(Event({
-            func = function()
-                if G.MAIN_MENU_UI then -- Wait until the ui is rendered before spawning the alert
-                    local mods_button = G.MAIN_MENU_UI:get_UIE_by_ID('mods_button')
-                    if mods_button then
-                        UIBox{definition = create_UIBox_card_alert(), config = {align="tri", offset = {x = 0.05, y = -0.05}, major = mods_button, can_collide = false}}
+    if menu and menu.nodes and menu.nodes[1] and menu.nodes[1].nodes and menu.nodes[1].nodes[1] and menu.nodes[1].nodes[1].nodes then
+        table.insert(menu.nodes[1].nodes[1].nodes, modsButton)
+        menu.nodes[1].nodes[1].config = {align = "cm", padding = 0.15, r = 0.1, emboss = 0.1, colour = G.C.L_BLACK, mid = true}
+        if SMODS.mod_button_alert then
+            G.E_MANAGER:add_event(Event({
+                func = function()
+                    if G.MAIN_MENU_UI then -- Wait until the ui is rendered before spawning the alert
+                        local mods_button = G.MAIN_MENU_UI:get_UIE_by_ID('mods_button')
+                        if mods_button then
+                            UIBox{definition = create_UIBox_card_alert(), config = {align="tri", offset = {x = 0.05, y = -0.05}, major = mods_button, can_collide = false}}
+                        end
+                        return true
                     end
-                    return true
-                end
-            end,
-            blocking = false,
-            blockable = false
-        }))
+                end,
+                blocking = false,
+                blockable = false
+            }))
+        end
+    else
+        sendErrorMessage("Failed to inject Mods button: unexpected menu structure", "SMODS")
     end
     return menu
 end
@@ -1532,7 +1540,9 @@ end
 local create_UIBox_profile_buttonRef = create_UIBox_profile_button
 function create_UIBox_profile_button()
     local profile_menu = create_UIBox_profile_buttonRef()
-    profile_menu.nodes[1].config = {align = "cm", padding = 0.11, r = 0.1, emboss = 0.1, colour = G.C.L_BLACK}
+    if profile_menu and profile_menu.nodes and profile_menu.nodes[1] then
+        profile_menu.nodes[1].config = {align = "cm", padding = 0.11, r = 0.1, emboss = 0.1, colour = G.C.L_BLACK}
+    end
     return(profile_menu)
 end
 
@@ -2103,23 +2113,25 @@ function G.UIDEF.run_setup_option(_type)
                 }
             }
         end
-        table.insert(ret.nodes[1].nodes, 1, {
-            n = G.UIT.R, config = { align = "cm", r = 0.1, minw = 6, minh = 0.6, colour = G.SETTINGS.reduced_motion and G.C.RED or SMODS.Gradients.warning_bg, padding = 0.1 }, nodes={
-                {
-                    n = G.UIT.C, config = { align = 'cm' }, nodes = {
-                        { n = G.UIT.O, config = { object = SMODS.create_sprite(0, 0, 0.8, 0.8, 'mod_tags', { x = 0, y = 0 }) } },
-                    }
-                }, 
-                { 
-                    n = G.UIT.C, config = { align = 'cm' }, nodes = text_nodes
-                },
-                {
-                    n = G.UIT.C, config = { align = 'cm' }, nodes = {
-                        { n = G.UIT.O, config = { object = SMODS.create_sprite(0, 0, 0.8, 0.8, 'mod_tags', { x = 0, y = 0 }) } },
-                    }
-                }, 
-            }
-        })
+        if ret and ret.nodes and ret.nodes[1] and ret.nodes[1].nodes then
+            table.insert(ret.nodes[1].nodes, 1, {
+                n = G.UIT.R, config = { align = "cm", r = 0.1, minw = 6, minh = 0.6, colour = G.SETTINGS.reduced_motion and G.C.RED or SMODS.Gradients.warning_bg, padding = 0.1 }, nodes={
+                    {
+                        n = G.UIT.C, config = { align = 'cm' }, nodes = {
+                            { n = G.UIT.O, config = { object = SMODS.create_sprite(0, 0, 0.8, 0.8, 'mod_tags', { x = 0, y = 0 }) } },
+                        }
+                    }, 
+                    { 
+                        n = G.UIT.C, config = { align = 'cm' }, nodes = text_nodes
+                    },
+                    {
+                        n = G.UIT.C, config = { align = 'cm' }, nodes = {
+                            { n = G.UIT.O, config = { object = SMODS.create_sprite(0, 0, 0.8, 0.8, 'mod_tags', { x = 0, y = 0 }) } },
+                        }
+                    }, 
+                }
+            })
+        end
     end
     return ret
 end
