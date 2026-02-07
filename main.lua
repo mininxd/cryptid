@@ -1,5 +1,17 @@
 if (jit.arch == 'arm64' or jit.arch == 'arm') then jit.off() end
 
+package.path = package.path .. ";mods/steamodded/libs/?.lua;mods/steamodded/libs/?/init.lua"
+package.path = package.path .. ";nativefs/?.lua;nativefs/?/init.lua"
+package.path = package.path .. ";lovely/?.lua;lovely/?/init.lua"
+require "nativefs"
+require "json"
+require "lovely"
+
+package.preload["SMODS.version"] = function() return require("mods.steamodded.version") end
+package.preload["SMODS.release"] = function() return require("mods.steamodded.release") end
+
+require "mods.steamodded.src.core"
+
 
 require "engine/object"
 require "bit"
@@ -29,7 +41,6 @@ require "card_character"
 require "engine/particles"
 require "engine/text"
 require "challenges"
-require "mods/cryptid/Cryptid"
 
 math.randomseed( G.SEED )
 

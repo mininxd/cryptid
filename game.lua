@@ -13,6 +13,7 @@ function Game:start_up()
     --Create the event manager for the game
     self.E_MANAGER = EventManager()
     self.SPEEDFACTOR = 1
+    if initSteamodded then initSteamodded() end
 
     --call the load manager
     G.LOAD_MANAGER = {
