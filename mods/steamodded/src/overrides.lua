@@ -1,6 +1,8 @@
 --- STEAMODDED CORE
 --- OVERRIDES
 
+if not Game then return end
+
 --#region blind UI
 -- Recreate all lines of the blind description.
 -- This callback is called each frame.

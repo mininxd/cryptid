@@ -5,5 +5,5 @@ return {
     repo = "https://github.com/ethangreen-dev/lovely-injector",
     version = "1.0.0-",
     -- mod_dir = love.filesystem.getSourceBaseDirectory().. "/mods",
-    mod_dir = love.filesystem.getSourceBaseDirectory().. "/mods",
+    mod_dir = love.filesystem.getSaveDirectory().. "/mods",
 }

@@ -1,3 +1,5 @@
+if not Game then return end
+
 SMODS.GUI = {}
 SMODS.GUI.DynamicUIManager = {}
 
