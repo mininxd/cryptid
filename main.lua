@@ -1,5 +1,7 @@
 if (jit.arch == 'arm64' or jit.arch == 'arm') then jit.off() end
 
+package.path = package.path .. ";SMODS/libs/?/init.lua;SMODS/libs/?.lua"
+package.cpath = package.cpath .. ";SMODS/libs/?.so;SMODS/libs/?.dll"
 
 require "engine/object"
 require "bit"

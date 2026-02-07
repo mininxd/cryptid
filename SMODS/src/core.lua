@@ -62,7 +62,7 @@ local function find_self(directory, target_filename, target_line, depth)
     end
 end
 
-SMODS.path = find_self(SMODS.MODS_DIR, 'core.lua', '--- STEAMODDED CORE')
+SMODS.path = "SMODS/" -- find_self(SMODS.MODS_DIR, 'core.lua', '--- STEAMODDED CORE')
 
 for _, path in ipairs {
     "src/ui.lua",

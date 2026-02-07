@@ -1,3 +1,5 @@
+require "SMODS.src.core"
+
 --Class
 Game = Object:extend()
 
@@ -167,6 +169,7 @@ function Game:start_up()
     self:set_language()
 
     self:init_item_prototypes()
+    initSteamodded()
     boot_timer('protos', 'shared sprites',0.9)
 
     --For globally shared sprites
