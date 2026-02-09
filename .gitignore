@@ -42,3 +42,4 @@ luac.out
 err.txt
 err.txt.bak
 resources
+.env
