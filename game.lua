@@ -22,14 +22,14 @@ function Game:start_up()
     }
     G.LOAD_MANAGER.thread:start(2)
 
-    self:load_all_files()
+    self:load_all_files() 
 
     --Load the settings file
     local settings = G.FILES['settings.jkr']
     local settings_ver = nil
-    if settings then
+    if settings then 
         local settings_file = settings
-        if G.VERSION < '1.0.0' then
+        if G.VERSION < '1.0.0' then 
             settings_ver = settings_file.version
         end
         for k, v in pairs(settings_file) do
@@ -45,78 +45,6 @@ function Game:start_up()
     self.C.SUITS.Diamonds = new_colour_proto.Diamonds
     self.C.SUITS.Spades = new_colour_proto.Spades
     self.C.SUITS.Clubs = new_colour_proto.Clubs
-
-    -- Initialize SMODS after basic game setup is complete
-    -- Load required modules
-    local nativefs_ok, nativefs = pcall(require, "nativefs")
-    if not nativefs_ok then
-        -- Try loading from Talisman mod
-        nativefs_ok, nativefs = pcall(require, "mods.Talisman-2.7.nativefs")
-        if not nativefs_ok then
-            -- Try loading from SMODS libs
-            nativefs_ok, nativefs = pcall(require, "SMODS.libs.nativefs.nativefs")
-            if not nativefs_ok then
-                print("Warning: Could not load nativefs module: " .. tostring(nativefs))
-                nativefs = nil
-            end
-        end
-    end
-
-    local json_ok, json_module = pcall(require, "json")
-    if not json_ok then
-        json_ok, json_module = pcall(require, "SMODS.libs.json.json")
-        if not json_ok then
-            print("Warning: Could not load json module: " .. tostring(json_module))
-            json_module = nil
-        end
-    end
-
-    -- Load lovely module
-    local lovely_ok, lovely = pcall(require, "lovely")
-    if not lovely_ok then
-        -- Create a minimal lovely implementation if the module doesn't exist
-        lovely = {
-            version = "0.7.1",
-            mod_dir = "mods/",
-            repo = "https://github.com/0xDrMerry/lovely"
-        }
-    end
-
-    -- Make lovely globally accessible for SMODS modules
-    _G.lovely = lovely
-
-    -- SMODS Core Implementation
-    SMODS = {}
-    MODDED_VERSION = require'SMODS.version'
-    RELEASE_VERSION = require'SMODS.release'
-    SMODS.id = 'Steamodded'
-    SMODS.version = MODDED_VERSION:gsub('%-STEAMODDED', '')
-    SMODS.can_load = true
-    SMODS.meta_mod = true
-    SMODS.config_file = 'config.lua'
-
-    -- Include lovely and nativefs modules (as per original core.lua)
-    local nativefs = nativefs
-    local lovely = lovely
-    local json = json_module
-
-    local lovely_mod_dir = lovely.mod_dir:gsub("/$", "")
-    NFS = nativefs
-    -- make sure NFS behaves the same as love.filesystem
-    -- NFS.setWorkingDirectory(love.filesystem.getSaveDirectory()) -- Skip this to avoid issues
-
-    JSON = json_module
-
-    -- Also make them globally accessible
-    _G.NFS = nativefs
-    _G.JSON = json_module
-    _G.lovely = lovely
-
-    -- Set up mod directory
-    SMODS.MODS_DIR = "mods/"
-
-    -- Set SMODS path directly since we know it exists
-    SMODS.path = "SMODS/"
 
     boot_timer('start', 'settings', 0.1)
 
@@ -239,120 +167,6 @@ function Game:start_up()
     self:set_language()
 
     self:init_item_prototypes()
-    
-    -- Initialize SMODS after basic game setup is complete
-    -- Load required modules
-    local nativefs_ok, nativefs = pcall(require, "nativefs")
-    if not nativefs_ok then
-        -- Try loading from Talisman mod
-        nativefs_ok, nativefs = pcall(require, "mods.Talisman-2.7.nativefs")
-        if not nativefs_ok then
-            -- Try loading from SMODS libs
-            nativefs_ok, nativefs = pcall(require, "SMODS.libs.nativefs.nativefs")
-            if not nativefs_ok then
-                print("Warning: Could not load nativefs module: " .. tostring(nativefs))
-                nativefs = nil
-            end
-        end
-    end
-
-    local json_ok, json_module = pcall(require, "json")
-    if not json_ok then
-        json_ok, json_module = pcall(require, "SMODS.libs.json.json")
-        if not json_ok then
-            print("Warning: Could not load json module: " .. tostring(json_module))
-            json_module = nil
-        end
-    end
-
-    -- Load lovely module
-    local lovely_ok, lovely = pcall(require, "lovely")
-    if not lovely_ok then
-        -- Create a minimal lovely implementation if the module doesn't exist
-        lovely = {
-            version = "0.7.1",
-            mod_dir = "mods/",
-            repo = "https://github.com/0xDrMerry/lovely"
-        }
-    end
-
-    -- Make lovely globally accessible for SMODS modules
-    _G.lovely = lovely
-
-    -- SMODS Core Implementation
-    SMODS = {}
-    MODDED_VERSION = require'SMODS.version'
-    RELEASE_VERSION = require'SMODS.release'
-    SMODS.id = 'Steamodded'
-    SMODS.version = MODDED_VERSION:gsub('%-STEAMODDED', '')
-    SMODS.can_load = true
-    SMODS.meta_mod = true
-    SMODS.config_file = 'config.lua'
-
-    -- Include lovely and nativefs modules (as per original core.lua)
-    local nativefs = nativefs
-    local lovely = lovely
-    local json = json_module
-
-    local lovely_mod_dir = lovely.mod_dir:gsub("/$", "")
-    NFS = nativefs
-    -- make sure NFS behaves the same as love.filesystem
-    -- NFS.setWorkingDirectory(love.filesystem.getSaveDirectory()) -- Skip this to avoid issues
-
-    JSON = json_module
-
-    -- Also make them globally accessible
-    _G.NFS = nativefs
-    _G.JSON = json_module
-    _G.lovely = lovely
-
-    -- Set up mod directory
-    SMODS.MODS_DIR = "mods/"
-
-    -- Set SMODS path directly since we know it exists
-    SMODS.path = "SMODS/"
-
-    -- Define placeholder for sendInfoMessage until logging module is loaded
-    if not sendInfoMessage then
-        sendInfoMessage = function(message, logger)
-            print("[INFO " .. (logger or "SMODS") .. "] " .. message)
-        end
-    end
-
-    -- Load all SMODS modules in the correct order to ensure dependencies are met
-    local smods_modules = {
-        "src/utils.lua",
-        "src/ui.lua",
-        "src/index.lua", 
-        "src/overrides.lua",
-        "src/logging.lua",
-        "src/compat_0_9_8.lua",
-        "src/game_object.lua",  -- Contains loadAPIs() function
-        "src/loader.lua"       -- Calls loadAPIs() function
-    }
-
-    -- Load SMODS modules
-    for _, module_path in ipairs(smods_modules) do
-        local full_path = SMODS.path .. module_path
-        
-        -- Try love.filesystem first (it's more reliable in most environments)
-        local content = love.filesystem.read(full_path)
-        if not content then
-            -- Fallback to nativefs if love.filesystem fails
-            if NFS and NFS.read then
-                content = NFS.read(full_path)
-            end
-        end
-        if not content then
-            print("Warning: Could not read SMODS file: " .. full_path)
-        else
-            local chunk = assert(load(content, ('=[SMODS _ "%s"]'):format(module_path)))
-            chunk()
-        end
-    end
-
-    sendInfoMessage("Steamodded v" .. SMODS.version, "SMODS")
-
     boot_timer('protos', 'shared sprites',0.9)
 
     --For globally shared sprites
@@ -385,10 +199,6 @@ function Game:start_up()
     self.sticker_map = {
         'White','Red','Green','Black','Blue','Purple','Orange','Gold'
     }
-
-    -- Initialize SMODS after all modules are loaded
-    if initSteamodded then initSteamodded() end
-
     boot_timer('shared sprites', 'prep stage',0.95)
 
     --For the visible cursor
@@ -585,7 +395,7 @@ function Game:init_item_prototypes()
         j_marble=           {order = 24,  unlocked = true,  demo = true, discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 2, cost = 6, name = "Marble Joker", pos = {x=3,y=2}, set = "Joker", effect = "Stone card hands", cost_mult = 1.0, config = {extra = 1}},
         j_loyalty_card=     {order = 25,  unlocked = true,  demo = true, discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 2, cost = 5, name = "Loyalty Card", pos = {x=4,y=2}, set = "Joker", effect = "1 in 10 mult", cost_mult = 1.0, config = {extra = {Xmult = 4, every = 5, remaining = "5 remaining"}}},
         j_8_ball=           {order = 26,  unlocked = true,  demo = false, discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 1, cost = 5, name = "8 Ball", pos = {x=0,y=5}, set = "Joker", effect = "Spawn Tarot", cost_mult = 1.0, config = {extra=4}},
-        j_misprint=         {order = 27,  unlocked = true,  demo = true, discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 1, cost = 4, name = "Misprint", pos = {x=6,y=2}, set = "Joker", effect = "Random Mult", cost_mult = 1.0, config = {extra = {max = 23, min = 0}}},
+        j_misprint=         {order = 27,  unlocked = true,  demo = true, discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 1, cost = 4, name = "Misprint", pos = {x=6,y=2}, set = "Joker", effect = "Random Mult", cost_mult = 1.0, config = {extra = {max = 28, min = 4}}},
         j_dusk=             {order = 28,  unlocked = true,  demo = true, discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 2, cost = 5, name = "Dusk", pos = {x=4,y=7}, set = "Joker", effect = "", config = {extra = 1}, unlock_condition = {type = '', extra = '', hidden = true}},
         j_raised_fist=      {order = 29,  unlocked = true,  demo = false, discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 1, cost = 5, name = "Raised Fist", pos = {x=8,y=2}, set = "Joker", effect = "Socialized Mult", cost_mult = 1.0, config = {}},
         j_chaos=            {order = 30,  unlocked = true,  demo = true, discovered = false, blueprint_compat = false, perishable_compat = true, eternal_compat = true, rarity = 1, cost = 4, name = "Chaos the Clown", pos = {x=1,y=0}, set = "Joker", effect = "Bonus Rerolls", cost_mult = 1.0, config = {extra = 1}},
@@ -717,6 +527,8 @@ function Game:init_item_prototypes()
         j_yorick=           {order = 148,  unlocked = false, start_locked = true, demo = true, discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 4, cost = 20, name = "Yorick", pos = {x=5,y=8}, soul_pos = {x=5, y=9}, set = "Joker", effect = "", config = {extra = {xmult = 1, discards = 23}}, unlock_condition = {type = '', extra = '', hidden = true}},
         j_chicot=           {order = 149,  unlocked = false, start_locked = true, demo = true, discovered = false, blueprint_compat = false, perishable_compat = true, eternal_compat = true, rarity = 4, cost = 20, name = "Chicot", pos = {x=6,y=8}, soul_pos = {x=6, y=9}, set = "Joker", effect = "", config = {}, unlock_condition = {type = '', extra = '', hidden = true}},
         j_perkeo=           {order = 150,  unlocked = false, start_locked = true, demo = true, discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 4, cost = 20, name = "Perkeo", pos = {x=7,y=8}, soul_pos = {x=7, y=9}, set = "Joker", effect = "", config = {}, unlock_condition = {type = '', extra = '', hidden = true}},
+      -- mods joker
+            j_super_joker=            {order = 151,  unlocked = true,   start_alerted = true, discovered = true, start_discovered = true, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 4, cost = 50, name = "Super Joker", pos = {x=0,y=0}, set = "custom_joker", effect = "Mult", cost_mult = 1.0, config = {mult = 1.7976931348623157e308}},
 
         --All Consumeables
 
@@ -731,7 +543,7 @@ function Game:init_item_prototypes()
         c_chariot=          {order = 8,     discovered = false, cost = 3, consumeable = true, name = "The Chariot", pos = {x=7,y=0}, set = "Tarot", effect = "Enhance", cost_mult = 1.0, config = {mod_conv = 'm_steel', max_highlighted = 1}},
         c_justice=          {order = 9,     discovered = false, cost = 3, consumeable = true, name = "Justice", pos = {x=8,y=0}, set = "Tarot", effect = "Enhance", cost_mult = 1.0, config = {mod_conv = 'm_glass', max_highlighted = 1}},
         c_hermit=           {order = 10,    discovered = false, cost = 3, consumeable = true, name = "The Hermit", pos = {x=9,y=0}, set = "Tarot", effect = "Dollar Doubler", cost_mult = 1.0, config = {extra = 20}},
-        c_wheel_of_fortune= {order = 11,    discovered = false, cost = 3, consumeable = true, name = "The Wheel of Fortune", pos = {x=0,y=1}, set = "Tarot", effect = "Round Bonus", cost_mult = 1.0, config = {extra = 4}},
+        c_wheel_of_fortune= {order = 11,    discovered = false, cost = 3, consumeable = true, name = "The Wheel of Fortune", pos = {x=0,y=1}, set = "Tarot", effect = "Round Bonus", cost_mult = 1.0, config = {extra = 1}},
         c_strength=         {order = 12,    discovered = false, cost = 3, consumeable = true, name = "Strength", pos = {x=1,y=1}, set = "Tarot", effect = "Round Bonus", cost_mult = 1.0, config = {mod_conv = 'up_rank', max_highlighted = 2}},
         c_hanged_man=       {order = 13,    discovered = false, cost = 3, consumeable = true, name = "The Hanged Man", pos = {x=2,y=1}, set = "Tarot", effect = "Card Removal", cost_mult = 1.0, config = {remove_card = true, max_highlighted = 2}},
         c_death=            {order = 14,    discovered = false, cost = 3, consumeable = true, name = "Death", pos = {x=3,y=1}, set = "Tarot", effect = "Card Conversion", cost_mult = 1.0, config = {mod_conv = 'card', max_highlighted = 2, min_highlighted = 2}},
@@ -898,6 +710,7 @@ function Game:init_item_prototypes()
         Enhanced = {},
         Edition = {},
         Joker = {},
+        custom_joker = {},  -- Add custom_joker pool
         Tarot = {},
         Planet = {},
         Tarot_Planet = {},
@@ -1023,8 +836,15 @@ function Game:init_item_prototypes()
         v.key = k
         if v.set == 'Joker' then table.insert(self.P_CENTER_POOLS['Joker'], v) end
         if v.set and v.demo and v.pos then table.insert(self.P_CENTER_POOLS['Demo'], v) end
-        if not v.wip then 
-            if v.set and v.set ~= 'Joker' and not v.skip_pool and not v.omit then table.insert(self.P_CENTER_POOLS[v.set], v) end
+        if not v.wip then
+            if v.set and v.set ~= 'Joker' and not v.skip_pool and not v.omit then 
+                if not self.P_CENTER_POOLS[v.set] then self.P_CENTER_POOLS[v.set] = {} end
+                table.insert(self.P_CENTER_POOLS[v.set], v) 
+            end
+            if v.set and v.set == 'custom_joker' and not v.skip_pool and not v.omit then 
+                if not self.P_CENTER_POOLS[v.set] then self.P_CENTER_POOLS[v.set] = {} end
+                table.insert(self.P_CENTER_POOLS[v.set], v) 
+            end
             if v.set == 'Tarot' or v.set == 'Planet' then table.insert(self.P_CENTER_POOLS['Tarot_Planet'], v) end
             if v.consumeable then table.insert(self.P_CENTER_POOLS['Consumeables'], v) end
             if v.rarity and v.set == 'Joker' and not v.demo then table.insert(self.P_JOKER_RARITY_POOLS[v.rarity], v) end
@@ -1034,6 +854,7 @@ function Game:init_item_prototypes()
     self:save_progress()
 
     table.sort(self.P_CENTER_POOLS["Joker"], function (a, b) return a.order < b.order end)
+    table.sort(self.P_CENTER_POOLS["custom_joker"], function (a, b) return a.order < b.order end)
     table.sort(self.P_CENTER_POOLS["Tarot"], function (a, b) return a.order < b.order end)
     table.sort(self.P_CENTER_POOLS["Planet"], function (a, b) return a.order < b.order end)
     table.sort(self.P_CENTER_POOLS["Tarot_Planet"], function (a, b) return a.order < b.order end)
@@ -1170,9 +991,12 @@ function Game:set_render_settings()
     }
     self.asset_atli = {
         {name = "cards_1", path = "resources/textures/"..self.SETTINGS.GRAPHICS.texture_scaling.."x/8BitDeck.png",px=71,py=95},
-        {name = "cards_2", path = "resources/textures/"..self.SETTINGS.GRAPHICS.texture_scaling.."x/8BitDeck_opt2.png",px=71,py=95},
+        {name = "cards_2", path = "mods/BigCards/assets/"..self.SETTINGS.GRAPHICS.texture_scaling.."x/BigCards.png",px=71,py=95},
         {name = "centers", path = "resources/textures/"..self.SETTINGS.GRAPHICS.texture_scaling.."x/Enhancers.png",px=71,py=95},
         {name = "Joker", path = "resources/textures/"..self.SETTINGS.GRAPHICS.texture_scaling.."x/Jokers.png",px=71,py=95},
+        -- jokers mod set
+        {name = "custom_joker", path = "resources/textures/"..self.SETTINGS.GRAPHICS.texture_scaling.."x/custom_jokers.png",px=71,py=95},
+        -- end
         {name = "Tarot", path = "resources/textures/"..self.SETTINGS.GRAPHICS.texture_scaling.."x/Tarots.png",px=71,py=95},
         {name = "Voucher", path = "resources/textures/"..self.SETTINGS.GRAPHICS.texture_scaling.."x/Vouchers.png",px=71,py=95},
         {name = "Booster", path = "resources/textures/"..self.SETTINGS.GRAPHICS.texture_scaling.."x/boosters.png",px=71,py=95},
