@@ -2608,7 +2608,7 @@ function generate_card_ui(_c, full_UI_table, specific_vars, card_type, badges, h
         local vars = (specific_vars and (specific_vars[1] or specific_vars.sticker)) and specific_vars or loc_vars
         if not (vars and vars[1]) then
             if _c.name == 'Super Joker' then vars = {_c.config.mult}
-            elseif _c.name == 'Aura Farming' then vars = {_c.config.extra, _c.config.mult}
+            elseif _c.name == 'Aura Farming' then vars = {_c.config.extra, 0.1, _c.config.mult, _c.config.x_mult}
             end
         end
         localize{type = 'descriptions', key = _c.key, set = _c.set, nodes = desc_nodes, vars = vars or {}}

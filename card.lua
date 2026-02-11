@@ -737,7 +737,7 @@ function Card:generate_UIBox_ability_table()
     elseif self.ability.set == 'Joker' or self.ability.set == 'custom_joker' then -- all remaining jokers
         if self.ability.name == 'Joker' then loc_vars = {self.ability.mult}
         elseif self.ability.name == 'Super Joker' then loc_vars = {self.ability.mult}
-        elseif self.ability.name == 'Aura Farming' then loc_vars = {self.ability.extra, self.ability.mult}
+        elseif self.ability.name == 'Aura Farming' then loc_vars = {self.ability.extra, 0.1, self.ability.mult, self.ability.x_mult}
         elseif self.ability.name == 'Jolly Joker' or self.ability.name == 'Zany Joker' or
             self.ability.name == 'Mad Joker' or self.ability.name == 'Crazy Joker'  or 
             self.ability.name == 'Droll Joker' then 
@@ -2314,8 +2314,9 @@ function Card:calculate_joker(context)
         end
         if self.ability.name == 'Aura Farming' and context.joker_main then
             return {
-                message = localize{type='variable',key='a_mult',vars={self.ability.mult}},
-                mult_mod = self.ability.mult
+                mult_mod = self.ability.mult,
+                Xmult_mod = self.ability.x_mult,
+                message = localize{type='variable',key='a_mult',vars={self.ability.mult}}
             }
         end
         if self.ability.name == "Blueprint" then
@@ -2908,6 +2909,16 @@ function Card:calculate_joker(context)
                     return {
                         message = localize('k_reset'),
                         colour = G.C.RED
+                    }
+                end
+                if self.ability.name == 'Aura Farming' and G.GAME.blind.boss then
+                    local lost_mult = self.ability.mult - math.floor(self.ability.mult * 0.5)
+                    self.ability.x_mult = self.ability.x_mult + 0.1
+                    self.ability.mult = math.floor(self.ability.mult * 0.5)
+                    card_eval_status_text(self, 'extra', nil, nil, nil, {message = "-" .. lost_mult .. " Aura", colour = G.C.RED})
+                    return {
+                        message = "X0.1 Mult",
+                        colour = G.C.MULT
                     }
                 end
                 if self.ability.name == 'Rocket' and G.GAME.blind.boss then

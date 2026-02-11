@@ -1,6 +1,8 @@
 VERSION = '1.0.1o'
 VERSION = VERSION..'-FULL'
 VERSION = VERSION..' [M]'
+
+VERSION = VERSION..'\nhttps://github.com/mininxd/balatromod'
 --check_version
 
 --Globals
