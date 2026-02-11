@@ -43,3 +43,6 @@ err.txt
 err.txt.bak
 resources
 .env
+*bak
+*/*bak
+*/*/*bak
