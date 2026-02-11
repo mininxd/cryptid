@@ -743,7 +743,7 @@ G.CHALLENGES = {
                 {id = 'no_shop_jokers'},
             },
             modifiers = {
-                {id = 'joker_slots', value = 2},
+                {id = 'joker_slots', value = 1},
             }
         },
         jokers = {

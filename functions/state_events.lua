@@ -211,7 +211,7 @@ function end_round()
                             --Check for hand doubling
                             --From Red seal
                             local eval = eval_card(G.hand.cards[i], {end_of_round = true,cardarea = G.hand, repetition = true, repetition_only = true})
-                            if next(eval) and (next(effects[1]) or #effects > 1)  then 
+                            if eval.seals and eval.seals.repetitions and (next(effects[1]) or #effects > 1)  then 
                                 for h = 1, eval.seals.repetitions do
                                     reps[#reps+1] = eval
                                 end
@@ -221,7 +221,7 @@ function end_round()
                             for j=1, #G.jokers.cards do
                                 --calculate the joker effects
                                 local eval = eval_card(G.jokers.cards[j], {cardarea = G.hand, other_card = G.hand.cards[i], repetition = true, end_of_round = true, card_effects = effects})
-                                if next(eval) then 
+                                if eval.jokers and eval.jokers.repetitions then 
                                     for h  = 1, eval.jokers.repetitions do
                                         reps[#reps+1] = eval
                                     end
@@ -688,7 +688,7 @@ G.FUNCS.evaluate_play = function(e)
                 
                 --From Red seal
                 local eval = eval_card(scoring_hand[i], {repetition_only = true,cardarea = G.play, full_hand = G.play.cards, scoring_hand = scoring_hand, scoring_name = text, poker_hands = poker_hands, repetition = true})
-                if next(eval) then 
+                if eval.seals and eval.seals.repetitions then 
                     for h = 1, eval.seals.repetitions do
                         reps[#reps+1] = eval
                     end
@@ -697,7 +697,7 @@ G.FUNCS.evaluate_play = function(e)
                 for j=1, #G.jokers.cards do
                     --calculate the joker effects
                     local eval = eval_card(G.jokers.cards[j], {cardarea = G.play, full_hand = G.play.cards, scoring_hand = scoring_hand, scoring_name = text, poker_hands = poker_hands, other_card = scoring_hand[i], repetition = true})
-                    if next(eval) and eval.jokers then 
+                    if eval.jokers and eval.jokers.repetitions then 
                         for h = 1, eval.jokers.repetitions do
                             reps[#reps+1] = eval
                         end
@@ -832,7 +832,7 @@ G.FUNCS.evaluate_play = function(e)
 
                         --From Red seal
                         local eval = eval_card(G.hand.cards[i], {repetition_only = true,cardarea = G.hand, full_hand = G.play.cards, scoring_hand = scoring_hand, scoring_name = text, poker_hands = poker_hands, repetition = true, card_effects = effects})
-                        if next(eval) and (next(effects[1]) or #effects > 1) then 
+                        if eval.seals and eval.seals.repetitions and (next(effects[1]) or #effects > 1) then 
                             for h  = 1, eval.seals.repetitions do
                                 reps[#reps+1] = eval
                             end
@@ -842,7 +842,7 @@ G.FUNCS.evaluate_play = function(e)
                         for j=1, #G.jokers.cards do
                             --calculate the joker effects
                             local eval = eval_card(G.jokers.cards[j], {cardarea = G.hand, full_hand = G.play.cards, scoring_hand = scoring_hand, scoring_name = text, poker_hands = poker_hands, other_card = G.hand.cards[i], repetition = true, card_effects = effects})
-                            if next(eval) then 
+                            if eval.jokers and eval.jokers.repetitions then 
                                 for h  = 1, eval.jokers.repetitions do
                                     reps[#reps+1] = eval
                                 end

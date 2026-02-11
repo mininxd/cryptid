@@ -1317,6 +1317,7 @@ function set_discover_tallies()
       blinds = {tally = 0, of = 0},
       tags = {tally = 0, of = 0},
       jokers = {tally = 0, of = 0},
+      custom_joker = {tally = 0, of = 0},
       consumeables = {tally = 0, of = 0},
       tarots = {tally = 0, of = 0},
       planets = {tally = 0, of = 0},
@@ -1334,7 +1335,7 @@ function set_discover_tallies()
   
   for _, v in pairs(G.P_CENTERS) do
     if not v.omit then 
-      if v.set and ((v.set == 'Joker') or v.consumeable or (v.set == 'Edition') or (v.set == 'Voucher') or (v.set == 'Back') or (v.set == 'Booster')) then
+      if v.set and ((v.set == 'Joker') or (v.set == 'custom_joker') or v.consumeable or (v.set == 'Edition') or (v.set == 'Voucher') or (v.set == 'Back') or (v.set == 'Booster')) then
         G.DISCOVER_TALLIES.total.of = G.DISCOVER_TALLIES.total.of+1
         if v.discovered then 
           G.DISCOVER_TALLIES.total.tally = G.DISCOVER_TALLIES.total.tally+1
@@ -1344,6 +1345,12 @@ function set_discover_tallies()
         G.DISCOVER_TALLIES.jokers.of = G.DISCOVER_TALLIES.jokers.of+1
         if v.discovered then 
             G.DISCOVER_TALLIES.jokers.tally = G.DISCOVER_TALLIES.jokers.tally+1
+        end
+      end
+      if v.set and v.set == 'custom_joker' then
+        G.DISCOVER_TALLIES.custom_joker.of = G.DISCOVER_TALLIES.custom_joker.of+1
+        if v.discovered then 
+            G.DISCOVER_TALLIES.custom_joker.tally = G.DISCOVER_TALLIES.custom_joker.tally+1
         end
       end
       if v.set and v.set == 'Back' then

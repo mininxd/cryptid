@@ -162,19 +162,19 @@ function Card:set_sprites(_center, _front)
     if _center then 
         if _center.set then
             if self.children.center then
-                self.children.center.atlas = G.ASSET_ATLAS[(_center.atlas or (_center.set == 'Joker' or _center.set == 'custom_joker' or _center.consumeable or _center.set == 'Voucher') and (_center.set == 'custom_joker' and 'Joker' or _center.set)) or 'centers']
+                self.children.center.atlas = G.ASSET_ATLAS[(_center.atlas or (_center.set == 'Joker' or _center.set == 'custom_joker' or _center.consumeable or _center.set == 'Voucher') and (_center.set == 'custom_joker' and 'custom_joker' or _center.set)) or 'centers']
                 self.children.center:set_sprite_pos(_center.pos)
             else
                 if _center.set == 'Joker' and not _center.unlocked and not self.params.bypass_discovery_center then 
                     self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS["Joker"], G.j_locked.pos)
-                elseif _center.set == 'custom_joker' and not _center.unlocked and not self.params.bypass_discovery_center then 
+                elseif (_center.set == 'custom_joker') and not _center.unlocked and not self.params.bypass_discovery_center then 
                     self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS["Joker"], G.j_locked.pos)
                 elseif self.config.center.set == 'Voucher' and not self.config.center.unlocked and not self.params.bypass_discovery_center then 
                     self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS["Voucher"], G.v_locked.pos)
                 elseif self.config.center.consumeable and self.config.center.demo then 
                     self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS["Tarot"], G.c_locked.pos)
                 elseif not self.params.bypass_discovery_center and (_center.set == 'Edition' or _center.set == 'Joker' or _center.set == 'custom_joker' or _center.consumeable or _center.set == 'Voucher' or _center.set == 'Booster') and not _center.discovered then 
-                    self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS[_center.atlas or (_center.set == 'custom_joker' and 'Joker' or _center.set)], 
+                    self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS[_center.atlas or (_center.set == 'custom_joker' and 'custom_joker' or _center.set)], 
                     (_center.set == 'Joker' and G.j_undiscovered.pos) or 
                     (_center.set == 'custom_joker' and G.j_undiscovered.pos) or 
                     (_center.set == 'Edition' and G.j_undiscovered.pos) or 
@@ -184,7 +184,7 @@ function Card:set_sprites(_center, _front)
                     (_center.set == 'Voucher' and G.v_undiscovered.pos) or 
                     (_center.set == 'Booster' and G.booster_undiscovered.pos))
                 elseif _center.set == 'Joker' or _center.set == 'custom_joker' or _center.consumeable or _center.set == 'Voucher' then
-                    self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS[(_center.set == 'custom_joker' and 'Joker' or _center.set)], self.config.center.pos)
+                    self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS[(_center.set == 'custom_joker' and 'custom_joker' or _center.set)], self.config.center.pos)
                 else
                     self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS[_center.atlas or 'centers'], _center.pos)
                 end
@@ -291,6 +291,7 @@ function Card:set_ability(center, initial, delay_sprites)
         x_mult = center.config.Xmult or 1,
         h_size = center.config.h_size or 0,
         d_size = center.config.d_size or 0,
+        held_mult = center.config.held_mult or 0,
         extra = copy_table(center.config.extra) or nil,
         extra_value = 0,
         type = center.config.type or '',
@@ -735,6 +736,8 @@ function Card:generate_UIBox_ability_table()
                 }
     elseif self.ability.set == 'Joker' or self.ability.set == 'custom_joker' then -- all remaining jokers
         if self.ability.name == 'Joker' then loc_vars = {self.ability.mult}
+        elseif self.ability.name == 'Super Joker' then loc_vars = {self.ability.mult}
+        elseif self.ability.name == 'Aura Farming' then loc_vars = {self.ability.held_mult}
         elseif self.ability.name == 'Jolly Joker' or self.ability.name == 'Zany Joker' or
             self.ability.name == 'Mad Joker' or self.ability.name == 'Crazy Joker'  or 
             self.ability.name == 'Droll Joker' then 
@@ -2188,7 +2191,7 @@ function Card:start_materialize(dissolve_colours, silent, timefac)
     self.states.hover.can = false
     self.dissolve = 1
     self.dissolve_colours = dissolve_colours or
-    (self.ability.set == 'Joker' and {G.C.RARITY[self.config.center.rarity]}) or
+    ((self.ability.set == 'Joker' or self.ability.set == 'custom_joker') and {G.C.RARITY[self.config.center.rarity]}) or
     (self.ability.set == 'Planet'  and {G.C.SECONDARY_SET.Planet}) or
     (self.ability.set == 'Tarot' and {G.C.SECONDARY_SET.Tarot}) or
     (self.ability.set == 'Spectral' and {G.C.SECONDARY_SET.Spectral}) or
@@ -2303,6 +2306,20 @@ function Card:calculate_joker(context)
         end
     end
     if (self.ability.set == "Joker" or self.ability.set == "custom_joker") and not self.debuff then
+        if self.ability.name == 'Super Joker' and context.joker_main then
+            return {
+                message = localize{type='variable',key='a_mult',vars={self.ability.mult}},
+                mult_mod = self.ability.mult
+            }
+        end
+        if self.ability.name == 'Aura Farming' and context.individual and context.cardarea == G.hand then
+            if context.other_card.ability.effect ~= 'Stone Card' then
+                return {
+                    h_mult = self.ability.held_mult,
+                    card = self
+                }
+            end
+        end
         if self.ability.name == "Blueprint" then
             local other_joker = nil
             for i = 1, #G.jokers.cards do

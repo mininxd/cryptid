@@ -665,6 +665,27 @@ G.FUNCS.your_collection_joker_page = function(args)
   INIT_COLLECTION_CARD_ALERTS()
 end
 
+G.FUNCS.your_collection_custom_joker_page = function(args)
+  if not args or not args.cycle_config then return end
+  for j = 1, #G.your_collection do
+    for i = #G.your_collection[j].cards,1, -1 do
+      local c = G.your_collection[j]:remove_card(G.your_collection[j].cards[i])
+      c:remove()
+      c = nil
+    end
+  end
+  for i = 1, 5 do
+    for j = 1, #G.your_collection do
+      local center = G.P_CENTER_POOLS["custom_joker"][i+(j-1)*5 + (5*#G.your_collection*(args.cycle_config.current_option - 1))]
+      if not center then break end
+      local card = Card(G.your_collection[j].T.x + G.your_collection[j].T.w/2, G.your_collection[j].T.y, G.CARD_W, G.CARD_H, G.P_CARDS.empty, center)
+      card.sticker = get_joker_win_sticker(center)
+      G.your_collection[j]:emplace(card)
+    end
+  end
+  INIT_COLLECTION_CARD_ALERTS()
+end
+
 --Changing the current page being viewed for the tarot and planet card collection
 --
 ---@param args {cycle_config: table}
@@ -1517,6 +1538,13 @@ G.FUNCS.your_collection_jokers = function(e)
   G.SETTINGS.paused = true
   G.FUNCS.overlay_menu{
     definition = create_UIBox_your_collection_jokers(),
+  }
+end
+
+G.FUNCS.your_collection_custom_jokers = function(e)
+  G.SETTINGS.paused = true
+  G.FUNCS.overlay_menu{
+    definition = create_UIBox_your_collection_custom_jokers(),
   }
 end
 

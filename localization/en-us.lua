@@ -1866,42 +1866,25 @@ return {
                     "hand contains",
                     "a {C:attention}#2#",
                 },
-            },
-            
+            },         
         },
         
         custom_joker={
-            j_mewing={
-                name="Mewing",
+            j_super_joker={
+                name="Super Joker",
                 text={
                     "{C:red}+#1#{} Mult",
                 },
             },
-            j_cash_cash={
-                name="Cash Cash",
+            j_aura_farm={
+                name="Aura Farming",
                 text={
-                    "Earn {C:money}$#1#{} when scoring",
-                },
-            },
-            j_sample1={
-                name="Sample Custom Joker 1",
-                text={
-                    "This is a sample custom joker",
-                    "with {C:attention}special effects",
-                },
-            },
-            j_sample2={
-                name="Sample Custom Joker 2",
-                text={
-                    "{C:chips}+#1#{} Chips for each",
-                    "{C:attention}card{} played",
+                    "Each card held in hand",
+                    "gives {C:mult}+#1#{} Mult",
                 },
             },
         },
 
-
-        
-        
         Other={
             black_sticker={
                 name="Black Sticker",
@@ -3535,6 +3518,7 @@ return {
             b_how_to_play="How to play",
             b_imagery="Imagery",
             b_jokers="Jokers",
+            b_custom_jokers="Custom Jokers",
             b_load_profile="Load Profile",
             b_main_menu="Main Menu",
             b_music="Music",
@@ -3637,6 +3621,7 @@ return {
             k_common="Common",
             k_compatible="compatible",
             k_copied_ex="Copied!",
+            k_custom_joker="Custom Joker",
             k_custom_rules="Custom Rules",
             k_daily_run="Daily Run",
             k_debuffed="Debuffed",

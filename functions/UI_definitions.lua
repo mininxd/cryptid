@@ -144,7 +144,7 @@ end
 
 function create_UIBox_notify_alert(_achievement, _type, _from_left)
   local _c, _atlas = G.P_CENTERS[_achievement],
-    (_type == 'Joker' or _type == 'custom_joker') and G.ASSET_ATLAS["Joker"] or
+    (_type == 'Joker' or _type == 'custom_joker') and G.ASSET_ATLAS[(_type == 'custom_joker' and 'custom_joker' or 'Joker')] or
     _type == 'Voucher' and G.ASSET_ATLAS["Voucher"] or
     _type == 'Back' and G.ASSET_ATLAS["centers"] or
     G.ASSET_ATLAS["icons"]
@@ -1190,7 +1190,7 @@ end
       local outer_padding = 0.05
       local card_type = localize('k_'..string.lower(AUT.card_type))
 
-      if AUT.card_type == 'Joker' or (AUT.badges and AUT.badges.force_rarity) then card_type = ({localize('k_common'), localize('k_uncommon'), localize('k_rare'), localize('k_legendary')})[card.config.center.rarity] end
+      if AUT.card_type == 'Joker' or AUT.card_type == 'custom_joker' or (AUT.badges and AUT.badges.force_rarity) then card_type = ({localize('k_common'), localize('k_uncommon'), localize('k_rare'), localize('k_legendary')})[card.config.center.rarity] end
       if AUT.card_type == 'Enhanced' then card_type = localize{type = 'name_text', key = card.config.center.key, set = 'Enhanced'} end
       card_type = (debuffed and AUT.card_type ~= 'Enhanced') and localize('k_debuffed') or card_type
 
@@ -3618,6 +3618,7 @@ function create_UIBox_your_collection()
   local t = create_UIBox_generic_options({ back_func = G.STAGE == G.STAGES.RUN and 'options' or 'exit_overlay_menu', contents = {
     {n=G.UIT.C, config={align = "cm", padding = 0.15}, nodes={
       UIBox_button({button = 'your_collection_jokers', label = {localize('b_jokers')}, count = G.DISCOVER_TALLIES.jokers,  minw = 5, minh = 1.7, scale = 0.6, id = 'your_collection_jokers'}),
+      UIBox_button({button = 'your_collection_custom_jokers', label = {localize('b_custom_jokers')}, count = G.DISCOVER_TALLIES.custom_joker,  minw = 5, minh = 1.7, scale = 0.6, id = 'your_collection_custom_jokers'}),
       UIBox_button({button = 'your_collection_decks', label = {localize('b_decks')}, count = G.DISCOVER_TALLIES.backs, minw = 5}),
       UIBox_button({button = 'your_collection_vouchers', label = {localize('b_vouchers')}, count = G.DISCOVER_TALLIES.vouchers, minw = 5, id = 'your_collection_vouchers'}),
       {n=G.UIT.R, config={align = "cm", padding = 0.1, r=0.2, colour = G.C.BLACK}, nodes={
@@ -3681,6 +3682,50 @@ function create_UIBox_your_collection_jokers()
         {n=G.UIT.R, config={align = "cm", r = 0.1, colour = G.C.BLACK, emboss = 0.05}, nodes=deck_tables}, 
         {n=G.UIT.R, config={align = "cm"}, nodes={
           create_option_cycle({options = joker_options, w = 4.5, cycle_shoulders = true, opt_callback = 'your_collection_joker_page', current_option = 1, colour = G.C.RED, no_pips = true, focus_args = {snap_to = true, nav = 'wide'}})
+        }}
+    }})
+  return t
+end
+
+function create_UIBox_your_collection_custom_jokers()
+  local deck_tables = {}
+
+  G.your_collection = {}
+  for j = 1, 3 do
+    G.your_collection[j] = CardArea(
+      G.ROOM.T.x + 0.2*G.ROOM.T.w/2,G.ROOM.T.h,
+      5*G.CARD_W,
+      0.95*G.CARD_H, 
+      {card_limit = 5, type = 'title', highlight_limit = 0, collection = true})
+    table.insert(deck_tables, 
+    {n=G.UIT.R, config={align = "cm", padding = 0.07, no_fill = true}, nodes={
+      {n=G.UIT.O, config={object = G.your_collection[j]}}
+    }}
+    )
+  end
+
+  local joker_options = {}
+  for i = 1, math.ceil(#G.P_CENTER_POOLS.custom_joker/(5*#G.your_collection)) do
+    table.insert(joker_options, localize('k_page')..' '..tostring(i)..'/'..tostring(math.ceil(#G.P_CENTER_POOLS.custom_joker/(5*#G.your_collection))))
+  end
+
+  for i = 1, 5 do
+    for j = 1, #G.your_collection do
+      local center = G.P_CENTER_POOLS["custom_joker"][i+(j-1)*5]
+      if center then 
+        local card = Card(G.your_collection[j].T.x + G.your_collection[j].T.w/2, G.your_collection[j].T.y, G.CARD_W, G.CARD_H, nil, center)
+        card.sticker = get_joker_win_sticker(center)
+        G.your_collection[j]:emplace(card)
+      end
+    end
+  end
+
+  INIT_COLLECTION_CARD_ALERTS()
+  
+  local t =  create_UIBox_generic_options({ back_func = 'your_collection', contents = {
+        {n=G.UIT.R, config={align = "cm", r = 0.1, colour = G.C.BLACK, emboss = 0.05}, nodes=deck_tables}, 
+        {n=G.UIT.R, config={align = "cm"}, nodes={
+          create_option_cycle({options = joker_options, w = 4.5, cycle_shoulders = true, opt_callback = 'your_collection_custom_joker_page', current_option = 1, colour = G.C.RED, no_pips = true, focus_args = {snap_to = true, nav = 'wide'}})
         }}
     }})
   return t

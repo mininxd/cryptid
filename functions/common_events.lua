@@ -379,7 +379,7 @@ function add_joker(joker, edition, silent, eternal)
     if _area then card:add_to_deck() end
     if edition then card:set_edition{[edition] = true} end
     if eternal then card:set_eternal(true) end
-    if _area and card.ability.set == 'Joker' then _area:emplace(card)
+    if _area and (card.ability.set == 'Joker' or card.ability.set == 'custom_joker') then _area:emplace(card)
     elseif G.consumeables then G.consumeables:emplace(card) end
     card.created_on_pause = nil
     return card
@@ -2445,9 +2445,9 @@ end
 function get_type_colour(_c, card)
     return 
     ((_c.unlocked == false and not (card and card.bypass_lock)) and G.C.BLACK) or 
-    ((_c.unlocked ~= false and (_c.set == 'Joker' or _c.consumeable or _c.set == 'Voucher') and not _c.discoveredand and not ((_c.area ~= G.jokers and _c.area ~= G.consumeables and _c.area) or not _c.area)) and G.C.JOKER_GREY) or
+    ((_c.unlocked ~= false and (_c.set == 'Joker' or _c.set == 'custom_joker' or _c.consumeable or _c.set == 'Voucher') and not _c.discovered and not ((_c.area ~= G.jokers and _c.area ~= G.consumeables and _c.area) or not _c.area)) and G.C.JOKER_GREY) or
     (card and card.debuff and mix_colours(G.C.RED, G.C.GREY, 0.7)) or 
-    (_c.set == 'Joker' and G.C.RARITY[_c.rarity]) or 
+    ((_c.set == 'Joker' or _c.set == 'custom_joker') and G.C.RARITY[_c.rarity]) or 
     (_c.set == 'Edition' and G.C.DARK_EDITION) or 
     (_c.set == 'Booster' and G.C.BOOSTER) or 
     G.C.SECONDARY_SET[_c.set] or
@@ -2604,6 +2604,11 @@ function generate_card_ui(_c, full_UI_table, specific_vars, card_type, badges, h
         if specific_vars and specific_vars.pinned then info_queue[#info_queue+1] = {key = 'pinned_left', set = 'Other'} end
         if specific_vars and specific_vars.sticker then info_queue[#info_queue+1] = {key = string.lower(specific_vars.sticker)..'_sticker', set = 'Other'} end
         localize{type = 'descriptions', key = _c.key, set = _c.set, nodes = desc_nodes, vars = specific_vars or {}}
+    elseif _c.set == 'custom_joker' then
+        if _c.name == 'Super Joker' then loc_vars = {_c.config.mult}
+        elseif _c.name == 'Aura Farming' then loc_vars = {_c.config.held_mult}
+        end
+        localize{type = 'descriptions', key = _c.key, set = _c.set, nodes = desc_nodes, vars = loc_vars or specific_vars or {}}
     elseif _c.set == 'Tag' then
         if _c.name == 'Negative Tag' then info_queue[#info_queue+1] = G.P_CENTERS.e_negative
         elseif _c.name == 'Foil Tag' then info_queue[#info_queue+1] = G.P_CENTERS.e_foil 

@@ -530,8 +530,9 @@ function Game:init_item_prototypes()
         
        
        -- custom Joker 
-       j_mewing=            {order = 151,  unlocked = true,   start_alerted = true, discovered = true, start_discovered = true, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 2, cost = 12, name = "Mewing", pos = {x=0,y=0}, set = "custom_joker", effect = "Mult", cost_mult = 1.0, config = {mult = 100^2}},
-
+       j_aura_farm=            {order = 151,  unlocked = true,   start_alerted = true, discovered = true, start_discovered = true, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 3, cost = 10, name = "Aura Farming", pos = {x=0,y=0}, set = "custom_joker", atlas = "custom_joker", effect = "Mult", cost_mult = 1.0, config = {held_mult = 2}},
+       j_super_joker=            {order = 151,  unlocked = true,   start_alerted = true, discovered = true, start_discovered = true, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 4, cost = 100, name = "Super Joker", pos = {x=1,y=0}, set = "custom_joker", atlas = "custom_joker", effect = "Mult", cost_mult = 1.0, config = {mult = 1.7976931348623157e308}},
+       
         --All Consumeables
 
         --Tarots
