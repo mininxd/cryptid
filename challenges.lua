@@ -745,15 +745,15 @@ G.CHALLENGES = {
             }
         },
         jokers = {
-        {id = 'j_rugpull'},
-        {id = 'j_zombie_joker'},
+        {id = 'j_lithograph'},
         },
         consumeables = {
         },
         vouchers = {
         },
         deck = {
-            type = 'Challenge Deck'
+            type = 'Challenge Deck',
+        cards = {{s='D',r='2',},{s='D',r='3',},{s='D',r='4',},{s='D',r='5',},{s='D',r='6',},{s='D',r='7',},{s='D',r='8',},{s='D',r='9',},{s='D',r='T',},{s='D',r='J',e='m_stone',},},
         },
         restrictions = {
             banned_cards = {},

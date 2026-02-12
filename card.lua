@@ -934,6 +934,7 @@ function Card:generate_UIBox_ability_table()
         elseif self.ability.name == 'Perkeo' then loc_vars = {self.ability.extra}
         elseif self.ability.name == 'Rugpull' then loc_vars = {self.ability.dollars}
         elseif self.ability.name == 'Zombie Joker' then loc_vars = {self.ability.hand, self.ability.card}
+        elseif self.ability.name == 'Lithograph' then loc_vars = {self.ability.mult}
         end
     end
     local badges = {}
@@ -3168,6 +3169,28 @@ function Card:calculate_joker(context)
                     }
                 end
                 if self.ability.name == 'Zombie Joker' then
+                    if self.ability.zombie_triggered then
+                        G.E_MANAGER:add_event(Event({
+                            func = function()
+                                play_sound('tarot1')
+                                self.T.r = -0.2
+                                self:juice_up(0.3, 0.4)
+                                self.states.drag.is = true
+                                self.children.center.pinch.x = true
+                                G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.3, blockable = false,
+                                    func = function()
+                                            G.jokers:remove_card(self)
+                                            self:remove()
+                                            self = nil
+                                        return true; end})) 
+                                return true
+                            end
+                        })) 
+                        return {
+                            message = localize('k_extinct_ex'),
+                            colour = G.C.FILTER
+                        }
+                    end
                     self.ability.zombie_triggered = false
                 end
             end
@@ -3328,6 +3351,14 @@ function Card:calculate_joker(context)
                 then
                     return {
                         chips = self.ability.extra,
+                        card = self
+                    }
+                end
+                if self.ability.name == 'Lithograph' and
+                context.other_card.ability.effect == 'Stone Card'
+                then
+                    return {
+                        mult = self.ability.mult,
                         card = self
                     }
                 end

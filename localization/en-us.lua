@@ -1891,7 +1891,14 @@ return {
                 text={
                     "Instead of losing, give {C:blue}+#1#{}",
                     "{C:blue}Hand{} & add {C:money}#2#{} random",
-                    "{C:money}Cards{} to {C:money}Hand{}"
+                    "{C:money}Cards{} to {C:money}Hand{}",
+                    "{C:red}Destroyed{} if ability used"
+                },
+            },
+            j_lithograph={
+                name="Lithograph",
+                text={
+                    "{C:money}Stone Cards{} give {C:red}+#1#{} Mult",
                 },
             },
             j_super_joker={

@@ -1386,17 +1386,17 @@ G.FUNCS.evaluate_round = function()
         end
     end
     if to_number(G.GAME.dollars) >= 5 and not G.GAME.modifiers.no_interest then
-        add_round_eval_row({bonus = true, name='interest', pitch = pitch, dollars = G.GAME.interest_amount*math.min(math.floor(G.GAME.dollars/5), G.GAME.interest_cap/5)})
+        add_round_eval_row({bonus = true, name='interest', pitch = pitch, dollars = G.GAME.interest_amount*math.min(math.floor(to_number(G.GAME.dollars)/5), G.GAME.interest_cap/5)})
         pitch = pitch + 0.06
         if not G.GAME.seeded and not G.GAME.challenge then
-            if G.GAME.interest_amount*math.min(math.floor(G.GAME.dollars/5), G.GAME.interest_cap/5) == G.GAME.interest_amount*G.GAME.interest_cap/5 then 
+            if to_big(G.GAME.interest_amount*math.min(math.floor(to_number(G.GAME.dollars)/5), G.GAME.interest_cap/5)) == to_big(G.GAME.interest_amount*G.GAME.interest_cap/5) then 
                 G.PROFILES[G.SETTINGS.profile].career_stats.c_round_interest_cap_streak = G.PROFILES[G.SETTINGS.profile].career_stats.c_round_interest_cap_streak + 1
             else
                 G.PROFILES[G.SETTINGS.profile].career_stats.c_round_interest_cap_streak = 0
             end
         end
         check_for_unlock({type = 'interest_streak'})
-        dollars = dollars + G.GAME.interest_amount*math.min(math.floor(G.GAME.dollars/5), G.GAME.interest_cap/5)
+        dollars = dollars + G.GAME.interest_amount*math.min(math.floor(to_number(G.GAME.dollars)/5), G.GAME.interest_cap/5)
     end
 
     pitch = pitch + 0.06
