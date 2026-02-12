@@ -30,6 +30,7 @@ require "engine/particles"
 require "engine/text"
 require "challenges"
 require "mods/Always_Show_Seed"
+require "mods/Talisman/talisman"
 
 math.randomseed( G.SEED )
 

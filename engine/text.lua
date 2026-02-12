@@ -131,6 +131,14 @@ function DynaText:update_text(first_pass)
             end
         end
 
+        if Big then
+            if type(self.strings[k].W) == 'table' then
+                self.strings[k].W = to_number(self.strings[k].W)
+            end
+            if type(self.strings[k].H) == 'table' then
+                self.strings[k].H = to_number(self.strings[k].H)
+            end
+        end
         if self.strings[k].W > self.config.W then self.config.W = self.strings[k].W; self.strings[k].W_offset = 0 end
         if self.strings[k].H > self.config.H then self.config.H = self.strings[k].H; self.strings[k].H_offset = 0 end
     end
@@ -255,6 +263,10 @@ function DynaText:pulse(amt)
 end
 
 function DynaText:draw()
+    if Big then
+        self.scale = to_number(self.scale)
+        if self.shadow_parrallax then self.shadow_parrallax.x = to_number(self.shadow_parrallax.x) end
+    end
     if self.children.particle_effect then self.children.particle_effect:draw() end
 
     if self.shadow then 

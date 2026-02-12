@@ -70,7 +70,7 @@ function Game:set_globals()
 
     if love.system.getOS() == 'iOS' or love.system.getOS() == 'Android' then
         self.F_SAVE_TIMER = 10
-        self.F_DISCORD = nil
+        self.F_DISCORD = false
         self.F_ENGLISH_ONLY = true
 
         if love.system.getPlatform and love.system.getPlatform() == "tvos" then
@@ -84,7 +84,7 @@ function Game:set_globals()
         self.F_SOUND_THREAD = false
         self.F_QUIT_BUTTON = false
         self.F_MOBILE = true
-        self.F_LINKTREE = true
+        self.F_LINKTREE = false
         self.F_HIDE_LOADING_BAR = false
         self.F_VIDEO_SETTINGS = true
     end

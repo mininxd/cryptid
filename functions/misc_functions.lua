@@ -742,12 +742,12 @@ function modulate_sound(dt)
   if type(G.GAME.current_round.current_hand.chips) ~= 'number' or type(G.GAME.current_round.current_hand.mult) ~= 'number' then
     G.ARGS.score_intensity.earned_score = 0
   else
-    G.ARGS.score_intensity.earned_score = G.GAME.current_round.current_hand.chips*G.GAME.current_round.current_hand.mult
+    G.ARGS.score_intensity.earned_score = math.min(to_number(G.GAME.current_round.current_hand.chips*G.GAME.current_round.current_hand.mult), 1e300)
   end
-  G.ARGS.score_intensity.required_score = G.GAME.blind and G.GAME.blind.chips or 0
+  G.ARGS.score_intensity.required_score = to_number(G.GAME.blind and G.GAME.blind.chips or 0)
   G.ARGS.score_intensity.flames = math.min(1, (G.STAGE == G.STAGES.RUN and 1 or 0)*(
     (G.ARGS.chip_flames and (G.ARGS.chip_flames.real_intensity + G.ARGS.chip_flames.change) or 0))/10)
-  G.ARGS.score_intensity.organ = G.video_organ or G.ARGS.score_intensity.required_score > 0 and math.max(math.min(0.4, 0.1*math.log(G.ARGS.score_intensity.earned_score/(G.ARGS.score_intensity.required_score+1), 5)),0.) or 0
+  G.ARGS.score_intensity.organ = G.video_organ or to_big(G.ARGS.score_intensity.required_score) > to_big(0) and math.max(math.min(0.4, 0.1*math.log(G.ARGS.score_intensity.earned_score/(G.ARGS.score_intensity.required_score+1), 5)),0.) or 0
 
   local AC = G.SETTINGS.ambient_control
   G.ARGS.ambient_sounds = G.ARGS.ambient_sounds or {
@@ -793,6 +793,12 @@ function count_of_suit(area, suit)
 end
 
 function prep_draw(moveable, scale, rotate, offset)
+    if Big and G.STATE == G.STATES.MENU then
+        moveable.VT.x = to_number(moveable.VT.x)
+        moveable.VT.y = to_number(moveable.VT.y)
+        moveable.VT.w = to_number(moveable.VT.w)
+        moveable.VT.h = to_number(moveable.VT.h)
+    end
     love.graphics.push()
     love.graphics.scale(G.TILESCALE*G.TILESIZE)
     love.graphics.translate(

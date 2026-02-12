@@ -1870,19 +1870,25 @@ return {
         },
         
         custom_joker={
-            j_super_joker={
-                name="Super Joker",
-                text={
-                    "{C:red}+#1#{} Mult",
-                },
-            },
-            j_aura_farm={
+        j_aura_farm={
                 name="Aura Farming",
                 text={
                     "Each scored played card gains {C:mult}+#1#{} Mult",
                     "Each {C:attention}Boss Blind{} defeated gains {X:mult,C:white} X#2# {} Mult",
                     "and reduces current {C:mult}Mult{} by {C:attention}50%{}",
                     "{C:inactive}(Currently {C:mult}+#3#{C:inactive} and {X:mult,C:white} X#4# {C:inactive})",
+                },
+            },
+            j_rugpull={
+                name="Rugpull",
+                text={
+                    "+#1# at the end of round, set money to {C:money}0{} when sold",
+                },
+            },
+            j_super_joker={
+                name="Super Joker",
+                text={
+                    "{C:red}+#1#{} Mult",
                 },
             },
         },

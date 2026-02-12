@@ -1423,7 +1423,7 @@ function create_UIBox_HUD()
                   {n=G.UIT.T, config={text = localize('k_ante'), scale = 0.85*scale, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
                 }},
                 {n=G.UIT.R, config={align = "cm", r = 0.1, minw = 1.2, colour = temp_col2}, nodes={
-                  {n=G.UIT.O, config={object = DynaText({string = {{ref_table = G.GAME.round_resets, ref_value = 'ante'}}, colours = {G.C.IMPORTANT},shadow = true, font = G.LANGUAGES['en-us'].font, scale = 2*scale}),id = 'ante_UI_count'}},
+                  {n=G.UIT.O, config={object = DynaText({string = {{ref_table = G.GAME.round_resets, ref_value = 'ante_disp'}}, colours = {G.C.IMPORTANT},shadow = true, font = G.LANGUAGES['en-us'].font, scale = scale_number(G.GAME.round_resets.ante, 2*scale, 100, 1000000)}),id = 'ante_UI_count'}},
                   {n=G.UIT.T, config={text = " ", scale = 0.3*scale}},
                   {n=G.UIT.T, config={text = "/ ", scale = 0.7*scale, colour = G.C.WHITE, shadow = true, lang = G.LANGUAGES['en-us']}},
                   not G.FTP_LOCKED and 
@@ -3156,22 +3156,21 @@ function create_UIBox_current_hand_row(handname, simple)
   (not simple and
     {n=G.UIT.R, config={align = "cm", padding = 0.05, r = 0.1, colour = darken(G.C.JOKER_GREY, 0.1), emboss = 0.05, hover = true, force_focus = true, on_demand_tooltip = {text = localize(handname, 'poker_hand_descriptions'), filler = {func = create_UIBox_hand_tip, args = handname}}}, nodes={
       {n=G.UIT.C, config={align = "cl", padding = 0, minw = 5}, nodes={
-        {n=G.UIT.C, config={align = "cm", padding = 0.01, r = 0.1, colour = G.C.HAND_LEVELS[math.min(7, G.GAME.hands[handname].level)], minw = 1.5, outline = 0.8, outline_colour = G.C.WHITE}, nodes={
-          {n=G.UIT.T, config={text = localize('k_level_prefix')..G.GAME.hands[handname].level, scale = 0.5, colour = G.C.UI.TEXT_DARK}}
-        }},
-        {n=G.UIT.C, config={align = "cm", minw = 4.5, maxw = 4.5}, nodes={
+                    {n=G.UIT.C, config={align = "cm", padding = 0.01, r = 0.1, colour = G.C.HAND_LEVELS[math.floor(to_number(math.min(vals and vals.level or G.GAME.hands[handname].level, 7)))], minw = 1.5, outline = 0.8, outline_colour = G.C.WHITE}, nodes={
+                      {n=G.UIT.T, config={text = localize('k_level_prefix')..number_format(G.GAME.hands[handname].level), scale = 0.5, colour = G.C.UI.TEXT_DARK}}
+                    }},        {n=G.UIT.C, config={align = "cm", minw = 4.5, maxw = 4.5}, nodes={
           {n=G.UIT.T, config={text = ' '..localize(handname,'poker_hands'), scale = 0.45, colour = G.C.UI.TEXT_LIGHT, shadow = true}}
         }}
       }},
       {n=G.UIT.C, config={align = "cm", padding = 0.05, colour = G.C.BLACK,r = 0.1}, nodes={
         {n=G.UIT.C, config={align = "cr", padding = 0.01, r = 0.1, colour = G.C.CHIPS, minw = 1.1}, nodes={
-          {n=G.UIT.T, config={text = G.GAME.hands[handname].chips, lang = G.LANGUAGES['en-us'], scale = 0.45, colour = G.C.UI.TEXT_LIGHT}},
+          {n=G.UIT.T, config={text = number_format(G.GAME.hands[handname].chips, 1000000), lang = G.LANGUAGES['en-us'], scale = 0.45, colour = G.C.UI.TEXT_LIGHT}},
           {n=G.UIT.B, config={w = 0.08, h = 0.01}}
         }},
         {n=G.UIT.T, config={text = "X", scale = 0.45, lang = G.LANGUAGES['en-us'], colour = G.C.MULT}},
         {n=G.UIT.C, config={align = "cl", padding = 0.01, r = 0.1, colour = G.C.MULT, minw = 1.1}, nodes={
           {n=G.UIT.B, config={w = 0.08,h = 0.01}},
-          {n=G.UIT.T, config={text = G.GAME.hands[handname].mult, scale = 0.45, lang = G.LANGUAGES['en-us'], colour = G.C.UI.TEXT_LIGHT}}
+          {n=G.UIT.T, config={text = number_format(G.GAME.hands[handname].mult, 1000000), scale = 0.45, lang = G.LANGUAGES['en-us'], colour = G.C.UI.TEXT_LIGHT}}
         }}
       }},
       {n=G.UIT.C, config={align = "cm"}, nodes={

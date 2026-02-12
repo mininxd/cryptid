@@ -432,6 +432,12 @@ function Moveable:move_scale(dt)
 end
 
 function Moveable:move_wh(dt)
+    if Big and G.STATE == G.STATES.MENU then
+        self.T.w = to_number(self.T.w)
+        self.T.h = to_number(self.T.h)
+        self.VT.w = to_number(self.VT.w)
+        self.VT.h = to_number(self.VT.h)
+    end
     if (self.T.w ~= self.VT.w and not self.pinch.x) or 
         (self.T.h ~= self.VT.h and not self.pinch.y) or 
         (self.VT.w > 0 and self.pinch.x) or 

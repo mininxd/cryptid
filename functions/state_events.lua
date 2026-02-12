@@ -93,7 +93,7 @@ function end_round()
         local game_won = false
         G.RESET_BLIND_STATES = true
         G.RESET_JIGGLES = true
-            if G.GAME.chips - G.GAME.blind.chips >= 0 then
+            if to_big(G.GAME.chips) >= to_big(G.GAME.blind.chips) then
                 game_over = false
             end
             for i = 1, #G.jokers.cards do
@@ -589,7 +589,7 @@ G.FUNCS.get_poker_hand_info = function(_cards)
     return text, loc_disp_text, poker_hands, scoring_hand, disp_text
 end
   
-G.FUNCS.evaluate_play = function(e)
+function evaluate_play_intro()
     local text,disp_text,poker_hands,scoring_hand,non_loc_disp_text = G.FUNCS.get_poker_hand_info(G.play.cards)
     
     G.GAME.hands[text].played = G.GAME.hands[text].played + 1
@@ -632,7 +632,9 @@ G.FUNCS.evaluate_play = function(e)
     update_hand_text({sound = G.GAME.current_round.current_hand.handname ~= disp_text and 'button' or nil, volume = 0.4, immediate = true, nopulse = nil,
                 delay = G.GAME.current_round.current_hand.handname ~= disp_text and 0.4 or 0}, {handname=disp_text, level=G.GAME.hands[text].level, mult = G.GAME.hands[text].mult, chips = G.GAME.hands[text].chips})
 
-    if not G.GAME.blind:debuff_hand(G.play.cards, poker_hands, text) then
+    return text, disp_text, poker_hands, scoring_hand, non_loc_disp_text, percent, percent_delta
+end
+function evaluate_play_main(text, disp_text, poker_hands, scoring_hand, non_loc_disp_text, percent, percent_delta)
         mult = mod_mult(G.GAME.hands[text].mult)
         hand_chips = mod_chips(G.GAME.hands[text].chips)
 
@@ -768,6 +770,61 @@ G.FUNCS.evaluate_play = function(e)
                             card_eval_status_text(scoring_hand[i], 'extra', nil, percent, nil, effects[ii].extra)
                         end
 
+                        if effects[ii].x_chips then
+                            if effects[ii].card then juice_card(effects[ii].card) end
+                            hand_chips = mod_chips(hand_chips*effects[ii].x_chips)
+                            update_hand_text({delay = 0}, {chips = hand_chips})
+                            card_eval_status_text(scoring_hand[i], 'x_chips', effects[ii].x_chips, percent)
+                        end
+                        if effects[ii].e_chips then
+                            if effects[ii].card then juice_card(effects[ii].card) end
+                            hand_chips = mod_chips(hand_chips^effects[ii].e_chips)
+                            update_hand_text({delay = 0}, {chips = hand_chips})
+                            card_eval_status_text(scoring_hand[i], 'e_chips', effects[ii].e_chips, percent)
+                        end
+                        if effects[ii].ee_chips then
+                            if effects[ii].card then juice_card(effects[ii].card) end
+                            hand_chips = mod_chips(hand_chips:arrow(2, effects[ii].ee_chips))
+                            update_hand_text({delay = 0}, {chips = hand_chips})
+                            card_eval_status_text(scoring_hand[i], 'ee_chips', effects[ii].ee_chips, percent)
+                        end
+                        if effects[ii].eee_chips then
+                            if effects[ii].card then juice_card(effects[ii].card) end
+                            hand_chips = mod_chips(hand_chips:arrow(3, effects[ii].eee_chips))
+                            update_hand_text({delay = 0}, {chips = hand_chips})
+                            card_eval_status_text(scoring_hand[i], 'eee_chips', effects[ii].eee_chips, percent)
+                        end
+                        if effects[ii].hyper_chips and type(effects[ii].hyper_chips) == 'table' then
+                            if effects[ii].card then juice_card(effects[ii].card) end
+                            hand_chips = mod_chips(hand_chips:arrow(effects[ii].hyper_chips[1], effects[ii].hyper_chips[2]))
+                            update_hand_text({delay = 0}, {chips = hand_chips})
+                            card_eval_status_text(scoring_hand[i], 'hyper_chips', effects[ii].hyper_chips, percent)
+                        end
+                        if effects[ii].e_mult then
+                            if effects[ii].card then juice_card(effects[ii].card) end
+                            mult = mod_mult(mult^effects[ii].e_mult)
+                            update_hand_text({delay = 0}, {mult = mult})
+                            card_eval_status_text(scoring_hand[i], 'e_mult', effects[ii].e_mult, percent)
+                        end
+                        if effects[ii].ee_mult then
+                            if effects[ii].card then juice_card(effects[ii].card) end
+                            mult = mod_mult(mult:arrow(2, effects[ii].ee_mult))
+                            update_hand_text({delay = 0}, {mult = mult})
+                            card_eval_status_text(scoring_hand[i], 'ee_mult', effects[ii].ee_mult, percent)
+                        end
+                        if effects[ii].eee_mult then
+                            if effects[ii].card then juice_card(effects[ii].card) end
+                            mult = mod_mult(mult:arrow(3, effects[ii].eee_mult))
+                            update_hand_text({delay = 0}, {mult = mult})
+                            card_eval_status_text(scoring_hand[i], 'eee_mult', effects[ii].eee_mult, percent)
+                        end
+                        if effects[ii].hyper_mult and type(effects[ii].hyper_mult) == 'table' then
+                            if effects[ii].card then juice_card(effects[ii].card) end
+                            mult = mod_mult(mult:arrow(effects[ii].hyper_mult[1], effects[ii].hyper_mult[2]))
+                            update_hand_text({delay = 0}, {mult = mult})
+                            card_eval_status_text(scoring_hand[i], 'hyper_mult', effects[ii].hyper_mult, percent)
+                        end
+
                         --If x_mult added, do mult add event and mult the mult to the total
                         if effects[ii].x_mult then 
                             if effects[ii].card then juice_card(effects[ii].card) end
@@ -778,6 +835,53 @@ G.FUNCS.evaluate_play = function(e)
 
                         --calculate the card edition effects
                         if effects[ii].edition then
+                            local edi = effects[ii].edition
+                            if edi.x_chips then
+                                hand_chips = mod_chips(hand_chips * edi.x_chips)
+                                update_hand_text({delay = 0}, {chips = hand_chips})
+                                card_eval_status_text(scoring_hand[i], 'extra', nil, percent, nil, {message = 'X'.. edi.x_chips, colour = G.C.EDITION, edition = true})
+                            end
+                            if edi.e_chips then
+                                hand_chips = mod_chips(hand_chips ^ edi.e_chips)
+                                update_hand_text({delay = 0}, {chips = hand_chips})
+                                card_eval_status_text(scoring_hand[i], 'extra', nil, percent, nil, {message = '^'.. edi.e_chips, colour = G.C.EDITION, edition = true})
+                            end
+                            if edi.ee_chips then
+                                hand_chips = mod_chips(hand_chips:arrow(2, edi.ee_chips))
+                                update_hand_text({delay = 0}, {chips = hand_chips})
+                                card_eval_status_text(scoring_hand[i], 'extra', nil, percent, nil, {message = '^^'.. edi.ee_chips, colour = G.C.EDITION, edition = true})
+                            end
+                            if edi.eee_chips then
+                                hand_chips = mod_chips(hand_chips:arrow(3, edi.eee_chips))
+                                update_hand_text({delay = 0}, {chips = hand_chips})
+                                card_eval_status_text(scoring_hand[i], 'extra', nil, percent, nil, {message = '^^^'.. edi.eee_chips, colour = G.C.EDITION, edition = true})
+                            end
+                            if edi.hyper_chips and type(edi.hyper_chips) == 'table' then
+                                hand_chips = mod_chips(hand_chips:arrow(edi.hyper_chips[1], edi.hyper_chips[2]))
+                                update_hand_text({delay = 0}, {chips = hand_chips})
+                                card_eval_status_text(scoring_hand[i], 'extra', nil, percent, nil, {message = (edi.hyper_chips[1] > 5 and ('{' .. edi.hyper_chips[1] .. '}') or string.rep('^', edi.hyper_chips[1])) .. edi.hyper_chips[2], colour = G.C.EDITION, edition = true})
+                            end
+                            if edi.e_mult then
+                                mult = mod_mult(mult ^ edi.e_mult)
+                                update_hand_text({delay = 0}, {mult = mult})
+                                card_eval_status_text(scoring_hand[i], 'extra', nil, percent, nil, {message = '^'.. edi.e_mult ..' ' .. localize('k_mult'), colour = G.C.EDITION, edition = true})
+                            end
+                            if edi.ee_mult then
+                                mult = mod_mult(mult:arrow(2, edi.ee_mult))
+                                update_hand_text({delay = 0}, {mult = mult})
+                                card_eval_status_text(scoring_hand[i], 'extra', nil, percent, nil, {message = '^^'.. edi.ee_mult ..' ' .. localize('k_mult'), colour = G.C.EDITION, edition = true})
+                            end
+                            if edi.eee_mult then
+                                mult = mod_mult(mult:arrow(3, edi.eee_mult))
+                                update_hand_text({delay = 0}, {mult = mult})
+                                card_eval_status_text(scoring_hand[i], 'extra', nil, percent, nil, {message = '^^^'.. edi.eee_mult ..' ' .. localize('k_mult'), colour = G.C.EDITION, edition = true})
+                            end
+                            if edi.hyper_mult and type(edi.hyper_mult) == 'table' then
+                                mult = mod_mult(mult:arrow(edi.hyper_mult[1], edi.hyper_mult[2]))
+                                update_hand_text({delay = 0}, {mult = mult})
+                                card_eval_status_text(scoring_hand[i], 'extra', nil, percent, nil, {message = (edi.hyper_mult[1] > 5 and ('{' .. edi.hyper_mult[1] .. '}') or string.rep('^', edi.hyper_mult[1])) .. edi.hyper_mult[2] ..' ' .. localize('k_mult'), colour = G.C.EDITION, edition = true})
+                            end
+
                             hand_chips = mod_chips(hand_chips + (effects[ii].edition.chip_mod or 0))
                             mult = mult + (effects[ii].edition.mult_mod or 0)
                             mult = mod_mult(mult*(effects[ii].edition.x_mult_mod or 1))
@@ -799,7 +903,6 @@ G.FUNCS.evaluate_play = function(e)
                 end
             end
         end
-
         delay(0.3)
         local mod_percent = false
             for i=1, #G.hand.cards do
@@ -931,6 +1034,15 @@ G.FUNCS.evaluate_play = function(e)
                 if effects.jokers.mult_mod then mult = mod_mult(mult + effects.jokers.mult_mod);extras.mult = true end
                 if effects.jokers.chip_mod then hand_chips = mod_chips(hand_chips + effects.jokers.chip_mod);extras.hand_chips = true end
                 if effects.jokers.Xmult_mod then mult = mod_mult(mult*effects.jokers.Xmult_mod);extras.mult = true  end
+                if effects.jokers.Emult_mod then mult = mod_mult(mult^effects.jokers.Emult_mod);extras.mult = true end
+                if effects.jokers.EEmult_mod then mult = mod_mult(mult:arrow(2, effects.jokers.EEmult_mod));extras.mult = true end
+                if effects.jokers.EEEmult_mod then mult = mod_mult(mult:arrow(3, effects.jokers.EEEmult_mod));extras.mult = true end
+                if effects.jokers.hypermult_mod and type(effects.jokers.hypermult_mod) == 'table' then mult = mod_mult(mult:arrow(effects.jokers.hypermult_mod[1], effects.jokers.hypermult_mod[2]));extras.mult = true end
+                if effects.jokers.Xchip_mod then hand_chips = mod_chips(hand_chips*effects.jokers.Xchip_mod);extras.hand_chips = true end
+                if effects.jokers.Echip_mod then hand_chips = mod_chips(hand_chips^effects.jokers.Echip_mod);extras.hand_chips = true end
+                if effects.jokers.EEchip_mod then hand_chips = mod_chips(hand_chips:arrow(2, effects.jokers.EEchip_mod));extras.hand_chips = true end
+                if effects.jokers.EEEchip_mod then hand_chips = mod_chips(hand_chips:arrow(3, effects.jokers.EEEchip_mod));extras.hand_chips = true end
+                if effects.jokers.hyperchip_mod and type(effects.jokers.hyperchip_mod) == 'table' then hand_chips = mod_chips(hand_chips:arrow(effects.jokers.hyperchip_mod[1], effects.jokers.hyperchip_mod[2]));extras.hand_chips = true end
                 update_hand_text({delay = 0}, {chips = extras.hand_chips and hand_chips, mult = extras.mult and mult})
                 card_eval_status_text(_card, 'jokers', nil, percent, nil, effects.jokers)
                 percent = percent+percent_delta
@@ -944,6 +1056,15 @@ G.FUNCS.evaluate_play = function(e)
                     if effect.mult_mod then mult = mod_mult(mult + effect.mult_mod);extras.mult = true end
                     if effect.chip_mod then hand_chips = mod_chips(hand_chips + effect.chip_mod);extras.hand_chips = true end
                     if effect.Xmult_mod then mult = mod_mult(mult*effect.Xmult_mod);extras.mult = true  end
+                    if effect.Emult_mod then mult = mod_mult(mult^effect.Emult_mod);extras.mult = true end
+                    if effect.EEmult_mod then mult = mod_mult(mult:arrow(2, effect.EEmult_mod));extras.mult = true end
+                    if effect.EEEmult_mod then mult = mod_mult(mult:arrow(3, effect.EEEmult_mod));extras.mult = true end
+                    if effect.hypermult_mod and type(effect.hypermult_mod) == 'table' then mult = mod_mult(mult:arrow(effect.hypermult_mod[1], effect.hypermult_mod[2]));extras.mult = true end
+                    if effect.Xchip_mod then hand_chips = mod_chips(hand_chips*effect.Xchip_mod);extras.hand_chips = true end
+                    if effect.Echip_mod then hand_chips = mod_chips(hand_chips^effect.Echip_mod);extras.hand_chips = true end
+                    if effect.EEchip_mod then hand_chips = mod_chips(hand_chips:arrow(2, effect.EEchip_mod));extras.hand_chips = true end
+                    if effect.EEEchip_mod then hand_chips = mod_chips(hand_chips:arrow(3, effect.EEEchip_mod));extras.hand_chips = true end
+                    if effect.hyperchip_mod and type(effect.hyperchip_mod) == 'table' then hand_chips = mod_chips(hand_chips:arrow(effect.hyperchip_mod[1], effect.hyperchip_mod[2]));extras.hand_chips = true end
                     if extras.mult or extras.hand_chips then update_hand_text({delay = 0}, {chips = extras.hand_chips and hand_chips, mult = extras.mult and mult}) end
                     if extras.mult or extras.hand_chips then card_eval_status_text(v, 'jokers', nil, percent, nil, effect) end
                     percent = percent+percent_delta
@@ -959,6 +1080,55 @@ G.FUNCS.evaluate_play = function(e)
                         x_mult_mod =  edition_effects.jokers.x_mult_mod,
                         colour =  G.C.EDITION,
                         edition = true})
+                end
+                if G.jokers.cards and G.jokers.cards[i] and G.jokers.cards[i].edition then
+                    local trg = G.jokers.cards[i]
+                    local edi = trg.edition
+                    if edi.x_chips then
+                        hand_chips = mod_chips(hand_chips * edi.x_chips)
+                        update_hand_text({delay = 0}, {chips = hand_chips})
+                        card_eval_status_text(trg, 'extra', nil, percent, nil, {message = 'X'.. edi.x_chips, colour = G.C.EDITION, edition = true})
+                    end
+                    if edi.e_chips then
+                        hand_chips = mod_chips(hand_chips ^ edi.e_chips)
+                        update_hand_text({delay = 0}, {chips = hand_chips})
+                        card_eval_status_text(trg, 'extra', nil, percent, nil, {message = '^'.. edi.e_chips, colour = G.C.EDITION, edition = true})
+                    end
+                    if edi.ee_chips then
+                        hand_chips = mod_chips(hand_chips:arrow(2, edi.ee_chips))
+                        update_hand_text({delay = 0}, {chips = hand_chips})
+                        card_eval_status_text(trg, 'extra', nil, percent, nil, {message = '^^'.. edi.ee_chips, colour = G.C.EDITION, edition = true})
+                    end
+                    if edi.eee_chips then
+                        hand_chips = mod_chips(hand_chips:arrow(3, edi.eee_chips))
+                        update_hand_text({delay = 0}, {chips = hand_chips})
+                        card_eval_status_text(trg, 'extra', nil, percent, nil, {message = '^^^'.. edi.eee_chips, colour = G.C.EDITION, edition = true})
+                    end
+                    if edi.hyper_chips and type(edi.hyper_chips) == 'table' then
+                        hand_chips = mod_chips(hand_chips:arrow(edi.hyper_chips[1], edi.hyper_chips[2]))
+                        update_hand_text({delay = 0}, {chips = hand_chips})
+                        card_eval_status_text(trg, 'extra', nil, percent, nil, {message = (edi.hyper_chips[1] > 5 and ('{' .. edi.hyper_chips[1] .. '}') or string.rep('^', edi.hyper_chips[1])) .. edi.hyper_chips[2], colour = G.C.EDITION, edition = true})
+                    end
+                    if edi.e_mult then
+                        mult = mod_mult(mult ^ edi.e_mult)
+                        update_hand_text({delay = 0}, {mult = mult})
+                        card_eval_status_text(trg, 'extra', nil, percent, nil, {message = '^'.. edi.e_mult ..' ' .. localize('k_mult'), colour = G.C.EDITION, edition = true})
+                    end
+                    if edi.ee_mult then
+                        mult = mod_mult(mult:arrow(2, edi.ee_mult))
+                        update_hand_text({delay = 0}, {mult = mult})
+                        card_eval_status_text(trg, 'extra', nil, percent, nil, {message = '^^'.. edi.ee_mult ..' ' .. localize('k_mult'), colour = G.C.EDITION, edition = true})
+                    end
+                    if edi.eee_mult then
+                        mult = mod_mult(mult:arrow(3, edi.eee_mult))
+                        update_hand_text({delay = 0}, {mult = mult})
+                        card_eval_status_text(trg, 'extra', nil, percent, nil, {message = '^^^'.. edi.eee_mult ..' ' .. localize('k_mult'), colour = G.C.EDITION, edition = true})
+                    end
+                    if edi.hyper_mult and type(edi.hyper_mult) == 'table' then
+                        mult = mod_mult(mult:arrow(edi.hyper_mult[1], edi.hyper_mult[2]))
+                        update_hand_text({delay = 0}, {mult = mult})
+                        card_eval_status_text(trg, 'extra', nil, percent, nil, {message = (edi.hyper_mult[1] > 5 and ('{' .. edi.hyper_mult[1] .. '}') or string.rep('^', edi.hyper_mult[1])) .. edi.hyper_mult[2] ..' ' .. localize('k_mult'), colour = G.C.EDITION, edition = true})
+                    end
                 end
                 percent = percent+percent_delta
             end
@@ -1014,10 +1184,12 @@ G.FUNCS.evaluate_play = function(e)
                   return true
                 end
               }))
+                end
+            return text, disp_text, poker_hands, scoring_hand, non_loc_disp_text, percent, percent_delta
         end
-    else
-        mult = mod_mult(0)
-        hand_chips = mod_chips(0)
+        
+        function evaluate_play_debuff(text, disp_text, poker_hands, scoring_hand, non_loc_disp_text, percent, percent_delta)
+            mult = mod_mult(0)        hand_chips = mod_chips(0)
         G.E_MANAGER:add_event(Event({
             trigger = 'immediate',
             func = (function()
@@ -1046,7 +1218,9 @@ G.FUNCS.evaluate_play = function(e)
                 percent = percent+percent_delta
             end
         end
-    end
+    return text, disp_text, poker_hands, scoring_hand, non_loc_disp_text, percent, percent_delta
+end
+function evaluate_play_final_scoring(text, disp_text, poker_hands, scoring_hand, non_loc_disp_text, percent, percent_delta)
     G.E_MANAGER:add_event(Event({
         trigger = 'after',delay = 0.4,
         func = (function()  update_hand_text({delay = 0, immediate = true}, {mult = 0, chips = 0, chip_total = math.floor(hand_chips*mult), level = '', handname = ''});play_sound('button', 0.9, 0.6);return true end)
@@ -1055,8 +1229,7 @@ G.FUNCS.evaluate_play = function(e)
 
       check_for_unlock({type = 'chip_score', chips = math.floor(hand_chips*mult)})
    
-    if hand_chips*mult > 0 then 
-        delay(0.8)
+            if to_big(hand_chips)*mult > to_big(0) then        delay(0.8)
         G.E_MANAGER:add_event(Event({
         trigger = 'immediate',
         func = (function() play_sound('chips2');return true end)
@@ -1085,6 +1258,9 @@ G.FUNCS.evaluate_play = function(e)
       func = (function() G.GAME.current_round.current_hand.handname = '';return true end)
     }))
     delay(0.3)
+    return text, disp_text, poker_hands, scoring_hand, non_loc_disp_text, percent, percent_delta
+end
+function evaluate_play_after(text, disp_text, poker_hands, scoring_hand, non_loc_disp_text, percent, percent_delta)
 
     for i=1, #G.jokers.cards do
         --calculate the joker after hand played effects
@@ -1157,7 +1333,7 @@ G.FUNCS.evaluate_round = function()
     local pitch = 0.95
     local dollars = 0
 
-    if G.GAME.chips - G.GAME.blind.chips >= 0 then
+    if to_big(G.GAME.chips) >= to_big(G.GAME.blind.chips) then
         add_round_eval_row({dollars = G.GAME.blind.dollars, name='blind1', pitch = pitch})
         pitch = pitch + 0.06
         dollars = dollars + G.GAME.blind.dollars
@@ -1209,7 +1385,7 @@ G.FUNCS.evaluate_round = function()
             dollars = dollars + ret.dollars
         end
     end
-    if G.GAME.dollars >= 5 and not G.GAME.modifiers.no_interest then
+    if to_number(G.GAME.dollars) >= 5 and not G.GAME.modifiers.no_interest then
         add_round_eval_row({bonus = true, name='interest', pitch = pitch, dollars = G.GAME.interest_amount*math.min(math.floor(G.GAME.dollars/5), G.GAME.interest_cap/5)})
         pitch = pitch + 0.06
         if not G.GAME.seeded and not G.GAME.challenge then

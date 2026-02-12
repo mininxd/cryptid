@@ -47,7 +47,16 @@ function STR_PACK(data, recursive)
           	i = "["..i.."]"
         end
         if type_v == "table" then
-			if v.is and v:is(Object) then
+            if v.m and v.e then
+                v = "to_big("..v.m..","..v.e..")"
+            elseif v.array and v.sign then
+                local v0 = "to_big({"
+                for i, v in pairs(v.array) do
+                    v0 = v0 .. ("["..i.."] = "..(v or 0)) .. ", "
+                end
+                v0 = v0 .. "},"..v.sign..")"
+                v = v0
+            elseif v.is and v:is(Object) then
 				v = [["]].."MANUAL_REPLACE"..[["]]
 			else
 				v = STR_PACK(v, true)

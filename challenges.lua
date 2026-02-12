@@ -743,11 +743,11 @@ G.CHALLENGES = {
             {id = 'no_shop_jokers'},
             },
             modifiers = {
-                {id = 'joker_slots', value = 1},
+                {id = 'joker_slots', value = 5},
             }
         },
         jokers = {
-                {id = 'j_aura_farm', eternal = true},
+                {id = 'j_aura_farm'},
         },
         consumeables = {
         },

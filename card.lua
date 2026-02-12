@@ -384,7 +384,7 @@ function Card:set_cost()
     end
     if (self.ability.set == 'Planet' or (self.ability.set == 'Booster' and self.ability.name:find('Celestial'))) and #find_joker('Astronomer') > 0 then self.cost = 0 end
     if self.ability.rental then self.cost = 1 end
-    self.sell_cost = math.max(1, math.floor(self.cost/2)) + (self.ability.extra_value or 0)
+    self.sell_cost = (self.config.center.sell_cost or math.max(1, math.floor(self.cost/2))) + (self.ability.extra_value or 0)
     if self.area and self.ability.couponed and (self.area == G.shop_jokers or self.area == G.shop_booster) then self.cost = 0 end
     self.sell_cost_label = self.facing == 'back' and '?' or self.sell_cost
 end
@@ -987,6 +987,71 @@ function Card:get_chip_bonus()
         return self.ability.bonus + (self.ability.perma_bonus or 0)
     end
     return self.base.nominal + self.ability.bonus + (self.ability.perma_bonus or 0)
+end
+
+function Card:get_chip_x_bonus()
+    if self.debuff then return 0 end
+    if self.ability.set == 'Joker' then return 0 end
+    if (self.ability.x_chips or 0) <= 1 then return 0 end
+    return self.ability.x_chips
+end
+
+function Card:get_chip_e_bonus()
+    if self.debuff then return 0 end
+    if self.ability.set == 'Joker' then return 0 end
+    if (self.ability.e_chips or 0) <= 1 then return 0 end
+    return self.ability.e_chips
+end
+
+function Card:get_chip_ee_bonus()
+    if self.debuff then return 0 end
+    if self.ability.set == 'Joker' then return 0 end
+    if (self.ability.ee_chips or 0) <= 1 then return 0 end
+    return self.ability.ee_chips
+end
+
+function Card:get_chip_eee_bonus()
+    if self.debuff then return 0 end
+    if self.ability.set == 'Joker' then return 0 end
+    if (self.ability.eee_chips or 0) <= 1 then return 0 end
+    return self.ability.eee_chips
+end
+
+function Card:get_chip_hyper_bonus()
+    if self.debuff then return {0,0} end
+    if self.ability.set == 'Joker' then return {0,0} end
+	if type(self.ability.hyper_chips) ~= 'table' then return {0,0} end
+    if (self.ability.hyper_chips[1] <= 0 or self.ability.hyper_chips[2] <= 0) then return {0,0} end
+    return self.ability.hyper_chips
+end
+
+function Card:get_chip_e_mult()
+    if self.debuff then return 0 end
+    if self.ability.set == 'Joker' then return 0 end
+    if (self.ability.e_mult or 0) <= 1 then return 0 end
+    return self.ability.e_mult
+end
+
+function Card:get_chip_ee_mult()
+    if self.debuff then return 0 end
+    if self.ability.set == 'Joker' then return 0 end
+    if (self.ability.ee_mult or 0) <= 1 then return 0 end
+    return self.ability.ee_mult
+end
+
+function Card:get_chip_eee_mult()
+    if self.debuff then return 0 end
+    if self.ability.set == 'Joker' then return 0 end
+    if (self.ability.eee_mult or 0) <= 1 then return 0 end
+    return self.ability.eee_mult
+end
+
+function Card:get_chip_hyper_mult()
+    if self.debuff then return {0,0} end
+    if self.ability.set == 'Joker' then return {0,0} end
+	if type(self.ability.hyper_mult) ~= 'table' then return {0,0} end
+    if (self.ability.hyper_mult[1] <= 0 or self.ability.hyper_mult[2] <= 0) then return {0,0} end
+    return self.ability.hyper_mult
 end
 
 function Card:get_chip_mult()
@@ -3073,8 +3138,7 @@ function Card:calculate_joker(context)
                     end
                 end
                 if self.ability.name == 'Mr. Bones' and context.game_over and 
-                G.GAME.chips/G.GAME.blind.chips >= 0.25 then
-                    G.E_MANAGER:add_event(Event({
+                                    to_big(G.GAME.chips)/G.GAME.blind.chips >= to_big(0.25) then                    G.E_MANAGER:add_event(Event({
                         func = function()
                             G.hand_text_area.blind_chips:juice_up()
                             G.hand_text_area.game_chips:juice_up()
@@ -3777,7 +3841,7 @@ function Card:calculate_joker(context)
                             }
                         end
                         if self.ability.name == 'Vagabond' and #G.consumeables.cards + G.GAME.consumeable_buffer < G.consumeables.config.card_limit then
-                            if G.GAME.dollars <= self.ability.extra then
+                            if to_number(G.GAME.dollars) <= to_number(self.ability.extra) then
                                 G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
                                 G.E_MANAGER:add_event(Event({
                                     trigger = 'before',
@@ -3969,7 +4033,7 @@ function Card:calculate_joker(context)
                                 colour = G.C.MULT
                             }
                         end
-                        if self.ability.name == 'Bull' and (G.GAME.dollars + (G.GAME.dollar_buffer or 0)) > 0 then
+                        if self.ability.name == 'Bull' and to_number(G.GAME.dollars + (G.GAME.dollar_buffer or 0)) > 0 then
                             return {
                                 message = localize{type='variable',key='a_chips',vars={self.ability.extra*math.max(0,(G.GAME.dollars + (G.GAME.dollar_buffer or 0))) }},
                                 chip_mod = self.ability.extra*math.max(0,(G.GAME.dollars + (G.GAME.dollar_buffer or 0))), 
@@ -4079,7 +4143,7 @@ function Card:calculate_joker(context)
                                 Xmult_mod = self.ability.extra.Xmult,
                             }
                         end
-                        if self.ability.name == 'Bootstraps' and math.floor((G.GAME.dollars + (G.GAME.dollar_buffer or 0))/self.ability.extra.dollars) >= 1 then 
+                        if self.ability.name == 'Bootstraps' and to_number(math.floor((G.GAME.dollars + (G.GAME.dollar_buffer or 0))/self.ability.extra.dollars)) >= 1 then 
                             return {
                                 message = localize{type='variable',key='a_mult',vars={self.ability.extra.mult*math.floor((G.GAME.dollars + (G.GAME.dollar_buffer or 0))/self.ability.extra.dollars)}},
                                 mult_mod = self.ability.extra.mult*math.floor((G.GAME.dollars + (G.GAME.dollar_buffer or 0))/self.ability.extra.dollars)
@@ -4703,10 +4767,10 @@ function Card:swipe_up()
         return
     end
     if self.area and ((self.area == G.shop_jokers) or (self.area == G.shop_booster) or (self.area == G.shop_vouchers)) then
-        if self.ability.set == 'Booster' and ((self.cost) <= 0 or (self.cost <= G.GAME.dollars - G.GAME.bankrupt_at)) then
+        if self.ability.set == 'Booster' and (to_number(self.cost) <= 0 or (to_number(self.cost) <= to_number(G.GAME.dollars) - to_number(G.GAME.bankrupt_at))) then
             G.FUNCS.use_card({config={ref_table = self}})
             return
-        elseif self.ability.set == 'Voucher' and ((self.cost) <= 0 or (self.cost <= G.GAME.dollars - G.GAME.bankrupt_at)) then   
+        elseif self.ability.set == 'Voucher' and (to_number(self.cost) <= 0 or (to_number(self.cost) <= to_number(G.GAME.dollars) - to_number(G.GAME.bankrupt_at))) then   
             G.FUNCS.use_card({config={ref_table = self}})
             return
         elseif self.area == G.shop_jokers and G.FUNCS.can_buy(self) then 

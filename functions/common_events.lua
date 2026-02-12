@@ -203,6 +203,10 @@ function ease_ante(mod)
               col = G.C.RED
           end
           G.GAME.round_resets.ante = G.GAME.round_resets.ante + mod
+          if Talisman then
+            G.GAME.round_resets.ante_disp = number_format(G.GAME.round_resets.ante, 1000000)
+            ante_UI.config.object.scale = scale_number(G.GAME.round_resets.ante, 0.8, 100, 1000000)
+          end
           check_and_set_high_score('furthest_ante', G.GAME.round_resets.ante)
           ante_UI.config.object:update()
           G.HUD:recalculate()
@@ -559,8 +563,8 @@ function update_hand_text(config, vals)
                 G.GAME.current_round.current_hand.hand_level = vals.level
             else
                 G.GAME.current_round.current_hand.hand_level = ' '..localize('k_lvl')..tostring(vals.level)
-                if type(vals.level) == 'number' then 
-                    G.hand_text_area.hand_level.config.colour = G.C.HAND_LEVELS[math.min(vals.level, 7)]
+                if type(vals.level) == 'number' or is_number(vals.level) then 
+                    G.hand_text_area.hand_level.config.colour = G.C.HAND_LEVELS[math.floor(to_number(math.min(vals.level, 7)))]
                 else
                     G.hand_text_area.hand_level.config.colour = G.C.HAND_LEVELS[1]
                 end
@@ -594,22 +598,22 @@ function eval_card(card, context)
     
     if context.cardarea == G.play then
         local chips = card:get_chip_bonus()
-        if chips > 0 then 
+        if to_big(chips) > to_big(0) then 
             ret.chips = chips
         end
 
         local mult = card:get_chip_mult()
-        if mult > 0 then 
+        if to_big(mult) > to_big(0) then 
             ret.mult = mult
         end
 
         local x_mult = card:get_chip_x_mult(context)
-        if x_mult > 0 then 
+        if to_big(x_mult) > to_big(0) then 
             ret.x_mult = x_mult
         end
 
         local p_dollars = card:get_p_dollars()
-        if p_dollars > 0 then 
+        if to_big(p_dollars) > to_big(0) then 
             ret.p_dollars = p_dollars
         end
 
@@ -626,12 +630,12 @@ function eval_card(card, context)
 
     if context.cardarea == G.hand then
         local h_mult = card:get_chip_h_mult()
-        if h_mult > 0 then 
+        if to_big(h_mult) > to_big(0) then 
             ret.h_mult = h_mult
         end
 
         local h_x_mult = card:get_chip_h_x_mult()
-        if h_x_mult > 0 then 
+        if to_big(h_x_mult) > to_big(0) then 
             ret.x_mult = h_x_mult
         end
 
@@ -852,8 +856,71 @@ function card_eval_status_text(card, eval_type, amt, percent, dir, extra)
         amt = amt
         text = localize('k_swapped_ex')
         colour = G.C.PURPLE
+    elseif eval_type == 'x_chips' then 
+        sound = 'talisman_xchip'
+        amt = amt
+        text = 'X' .. amt
+        colour = G.C.CHIPS
+        config.type = 'fade'
+        config.scale = 0.7
+    elseif eval_type == 'e_chips' then 
+        sound = 'talisman_echip'
+        amt = amt
+        text = '^' .. amt
+        colour = G.C.CHIPS
+        config.type = 'fade'
+        config.scale = 0.7
+    elseif eval_type == 'ee_chips' then 
+        sound = 'talisman_eechip'
+        amt = amt
+        text = '^^' .. amt
+        colour = G.C.CHIPS
+        config.type = 'fade'
+        config.scale = 0.7
+    elseif eval_type == 'eee_chips' then 
+        sound = 'talisman_eeechip'
+        amt = amt
+        text = '^^^' .. amt
+        colour = G.C.CHIPS
+        config.type = 'fade'
+        config.scale = 0.7
+    elseif eval_type == 'hyper_chips' then
+        sound = 'talisman_eeechip'
+        text = (amt[1] > 5 and ('{' .. tostring(amt[1]) .. '}') or string.rep('^', amt[1])) .. tostring(amt[2])
+        amt = amt[2]
+        colour = G.C.CHIPS
+        config.type = 'fade'
+        config.scale = 0.7
+    elseif eval_type == 'e_mult' then 
+        sound = 'talisman_emult'
+        amt = amt
+        text = '^' .. amt .. ' ' .. localize('k_mult')
+        colour = G.C.MULT
+        config.type = 'fade'
+        config.scale = 0.7
+    elseif eval_type == 'ee_mult' then 
+        sound = 'talisman_eemult'
+        amt = amt
+        text = '^^' .. amt .. ' ' .. localize('k_mult')
+        colour = G.C.MULT
+        config.type = 'fade'
+        config.scale = 0.7
+    elseif eval_type == 'eee_mult' then 
+        sound = 'talisman_eeemult'
+        amt = amt
+        text = '^^^' .. amt .. ' ' .. localize('k_mult')
+        colour = G.C.MULT
+        config.type = 'fade'
+        config.scale = 0.7
+    elseif eval_type == 'hyper_mult' then 
+        sound = 'talisman_eeemult'
+        text = (amt[1] > 5 and ('{' .. tostring(amt[1]) .. '}') or string.rep('^', amt[1])) .. tostring(amt[2]) .. ' ' .. localize('k_mult')
+        amt = amt[2]
+        colour = G.C.MULT
+        config.type = 'fade'
+        config.scale = 0.7
     elseif eval_type == 'extra' or eval_type == 'jokers' then 
-        sound = extra.edition and 'foil2' or extra.mult_mod and 'multhit1' or extra.Xmult_mod and 'multhit2' or 'generic1'
+        sound = extra.edition and 'foil2' or extra.mult_mod and 'multhit1' or extra.Xmult_mod and 'multhit2' or extra.Xchip_mod and 'talisman_xchip' or extra.Echip_mod and 'talisman_echip' or extra.Emult_mod and 'talisman_emult' or extra.EEchip_mod and 'talisman_eechip' or extra.EEmult_mod and 'talisman_eemult' or (extra.EEEchip_mod or extra.hyperchip_mod) and 'talisman_eeechip' or (extra.EEEmult_mod or extra.hypermult_mod) and 'talisman_eeemult' or 'generic1'
         if extra.edition then 
             colour = G.C.DARK_EDITION
         end
@@ -1246,7 +1313,7 @@ function check_for_unlock(args)
         end
     end
     if args.type == 'money' then
-        if G.GAME.dollars >= 400 then
+        if to_number(G.GAME.dollars) >= 400 then
             unlock_achievement('nest_egg')
         end
     end
@@ -1283,18 +1350,18 @@ function check_for_unlock(args)
         end
     end
     if args.type == 'upgrade_hand' then
-        if args.level >= 10 then
+        if to_big(args.level) >= to_big(10) then
             unlock_achievement('retrograde')
         end
     end
     if args.type == 'chip_score' then
-        if args.chips >= 10000 then
+        if to_big(args.chips) >= to_big(10000) then
             unlock_achievement('_10k')
         end
-        if args.chips >= 1000000 then
+        if to_big(args.chips) >= to_big(1000000) then
             unlock_achievement('_1000k')
         end
-        if args.chips >= 100000000 then
+        if to_big(args.chips) >= to_big(100000000) then
             unlock_achievement('_100000k')
         end
     end
@@ -1514,7 +1581,7 @@ function check_for_unlock(args)
                 end
             end
             if args.type == 'money' then
-                if card.unlock_condition.extra <= G.GAME.dollars then
+                if to_number(card.unlock_condition.extra) <= to_number(G.GAME.dollars) then
                     ret = true
                     unlock_card(card)   
                 end
@@ -1625,7 +1692,7 @@ function check_for_unlock(args)
                 end
             end
             if args.type == 'chip_score' then
-                if card.unlock_condition.chips <= args.chips then
+                if to_big(card.unlock_condition.chips) <= to_big(args.chips) then
                     ret = true
                     G.E_MANAGER:add_event(Event({
                         func = function()
@@ -2720,7 +2787,7 @@ function generate_card_ui(_c, full_UI_table, specific_vars, card_type, badges, h
     elseif _c.set == 'Planet' then
         loc_vars = {
             G.GAME.hands[_c.config.hand_type].level,localize(_c.config.hand_type, 'poker_hands'), G.GAME.hands[_c.config.hand_type].l_mult, G.GAME.hands[_c.config.hand_type].l_chips,
-            colours = {(G.GAME.hands[_c.config.hand_type].level==1 and G.C.UI.TEXT_DARK or G.C.HAND_LEVELS[math.min(7, G.GAME.hands[_c.config.hand_type].level)])}
+            colours = {(to_big(G.GAME.hands[_c.config.hand_type].level)==to_big(1) and G.C.UI.TEXT_DARK or G.C.HAND_LEVELS[math.floor(to_number(math.min(7, G.GAME.hands[_c.config.hand_type].level)))])}
         }
         localize{type = 'descriptions', key = _c.key, set = _c.set, nodes = desc_nodes, vars = loc_vars}
     elseif _c.set == 'Tarot' then

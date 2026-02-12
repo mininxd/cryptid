@@ -528,13 +528,20 @@ function Game:init_item_prototypes()
         j_chicot=           {order = 149,  unlocked = false, start_locked = true, demo = true, discovered = false, blueprint_compat = false, perishable_compat = true, eternal_compat = true, rarity = 4, cost = 20, name = "Chicot", pos = {x=6,y=8}, soul_pos = {x=6, y=9}, set = "Joker", effect = "", config = {}, unlock_condition = {type = '', extra = '', hidden = true}},
         j_perkeo=           {order = 150,  unlocked = false, start_locked = true, demo = true, discovered = false, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 4, cost = 20, name = "Perkeo", pos = {x=7,y=8}, soul_pos = {x=7, y=9}, set = "Joker", effect = "", config = {}, unlock_condition = {type = '', extra = '', hidden = true}},
         
+   
        
+           
+                   
        -- custom Joker 
-       j_aura_farm=            {order = 151,  unlocked = true,   start_alerted = true, discovered = true, start_discovered = true, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 3, cost = 10, name = "Aura Farming", pos = {x=0,y=0}, set = "custom_joker", atlas = "custom_joker", effect = "Mult", cost_mult = 1.0, config = {extra = 1, mult = 0, x_mult = 1}},
-       j_super_joker=            {order = 151,  unlocked = true,   start_alerted = true, discovered = true, start_discovered = true, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 4, cost = 100, name = "Super Joker", pos = {x=0,y=1}, soul_pos = {x=0, y=2}, set = "custom_joker", atlas = "custom_joker", effect = "Mult", cost_mult = 1.0, config = {mult = 1.7976931348623157e308}},
+       j_aura_farm= {order = 151,  unlocked = true,   start_alerted = true, discovered = true, start_discovered = true, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 3, cost = 10, sell_cost = 5, name = "Aura Farming", pos = {x=0,y=0}, set = "custom_joker", atlas = "custom_joker", effect = "Mult", cost_mult = 1.0, config = {extra = 1, mult = 0, x_mult = 1}},
+       j_rugpull= {order = 152,  unlocked = true,   start_alerted = true, discovered = true, start_discovered = true, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 2, cost = 6, sell_cost = 0, name = "Rugpull", pos = {x=1,y=0}, set = "custom_joker", atlas = "custom_joker", effect = "Mult", cost_mult = 1.0, config = {dollars = 8}},
+       j_super_joker= {order = 153,  unlocked = true,   start_alerted = true, discovered = true, start_discovered = true, blueprint_compat = true, perishable_compat = true, eternal_compat = true, rarity = 4, cost = 100, sell_cost = 10, name = "Super Joker", pos = {x=0,y=1}, soul_pos = {x=0, y=2}, set = "custom_joker", atlas = "custom_joker", effect = "Mult", cost_mult = 1.0, config = {mult = 1.7976931348623157e308}},
+       
+       
+       
+       
        
         --All Consumeables
-
         --Tarots
         c_fool=             {order = 1,     discovered = false, cost = 3, consumeable = true, name = "The Fool", pos = {x=0,y=0}, set = "Tarot", effect = "Disable Blind Effect", cost_mult = 1.0, config = {}},
         c_magician=         {order = 2,     discovered = false, cost = 3, consumeable = true, name = "The Magician", pos = {x=1,y=0}, set = "Tarot", effect = "Enhance", cost_mult = 1.0, config = {mod_conv = 'm_lucky', max_highlighted = 2}},
@@ -1326,7 +1333,10 @@ function Game:prep_stage(new_stage, new_state, new_game_obj)
     for k, v in pairs(self.CONTROLLER.locks) do
         self.CONTROLLER.locks[k] = nil
     end
-    if new_game_obj then self.GAME = self:init_game_object() end
+    if new_game_obj then 
+        self.GAME = self:init_game_object() 
+        if Talisman and Talisman.igo then self.GAME = Talisman.igo(self.GAME) end
+    end
     self.STAGE = new_stage or self.STAGES.MAIN_MENU
     self.STATE = new_state or self.STATES.MENU
     self.STATE_COMPLETE = false
@@ -2132,7 +2142,7 @@ function Game:init_game_object()
         perishable_rounds = 5,
         rental_rate = 3,
         blind =  nil,
-        chips = 0,
+        chips = to_big(0),
         chips_text = '0',
         voucher_text = '',
         dollars = 0,
@@ -2188,6 +2198,7 @@ function Game:init_game_object()
             temp_reroll_cost = nil,
             temp_handsize = nil,
             ante = 1,
+            ante_disp = number_format(1),
             blind_ante = 1,
             blind_states = {Small = 'Select', Big = 'Upcoming', Boss = 'Upcoming'},
             loc_blind_states = {Small = '', Big = '', Boss = ''},
@@ -2255,6 +2266,7 @@ function Game:start_run(args)
     local selected_back = saveTable and saveTable.BACK.name or (args.challenge and args.challenge.deck and args.challenge.deck.type) or (self.GAME.viewed_back and self.GAME.viewed_back.name) or self.GAME.selected_back and self.GAME.selected_back.name or 'Red Deck'
     selected_back = get_deck_from_name(selected_back)
     self.GAME = saveTable and saveTable.GAME or self:init_game_object()
+    if Talisman and Talisman.igo then self.GAME = Talisman.igo(self.GAME) end
     self.GAME.modifiers = self.GAME.modifiers or {}
     self.GAME.stake = args.stake or self.GAME.stake or 1
     self.GAME.STOP_USE = 0
@@ -3040,6 +3052,7 @@ function Game:update(dt)
 				G.SAVE_HANDLER.saving = G.SAVE_HANDLER.saving + 1
                 G.SAVE_MANAGER.request_channel:push({
                     type = 'save_run',
+                    talisman = Talisman and Talisman.config_file.break_infinity,
                     save_table = G.ARGS.save_run,
                     profile_num = G.SETTINGS.profile})
                 G.FILES[G.SETTINGS.profile..'/'..'save.jkr'] = copy_table(G.ARGS.save_run)
@@ -3564,7 +3577,7 @@ function Game:update_hand_played(dt)
         G.E_MANAGER:add_event(Event({
             trigger = 'immediate',
             func = function()
-        if G.GAME.chips - G.GAME.blind.chips >= 0 or G.GAME.current_round.hands_left < 1 then
+        if to_big(G.GAME.chips) >= to_big(G.GAME.blind.chips) or G.GAME.current_round.hands_left < 1 then
             G.STATE = G.STATES.NEW_ROUND
         else
             G.STATE = G.STATES.DRAW_TO_HAND

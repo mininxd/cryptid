@@ -89,7 +89,7 @@ G.FUNCS.buy_button_check = function(e)
 end
 
 G.FUNCS.can_buy = function(_card)
-  if _card.cost > (G.GAME.dollars - G.GAME.bankrupt_at) and (_card.cost > 0) then
+  if to_number(_card.cost) > (to_number(G.GAME.dollars) - to_number(G.GAME.bankrupt_at)) and (to_number(_card.cost) > 0) then
     return false
   end
   return true
@@ -115,7 +115,7 @@ G.FUNCS.buy_and_use_button_check = function(e)
 end
 
 G.FUNCS.can_buy_and_use = function(_card)
-  if (((_card.cost > G.GAME.dollars - G.GAME.bankrupt_at) and (_card.cost > 0)) or (not _card:can_use_consumeable())) then
+  if (((to_number(_card.cost) > to_number(G.GAME.dollars) - to_number(G.GAME.bankrupt_at)) and (to_number(_card.cost) > 0)) or (not _card:can_use_consumeable())) then
     return false
   end
   return true
@@ -127,7 +127,7 @@ end
 ---@param e {}
 --**e** Is the UIE that called this function
 G.FUNCS.can_redeem = function(e)
-  if e.config.ref_table.cost > G.GAME.dollars - G.GAME.bankrupt_at then
+  if to_number(e.config.ref_table.cost) > to_number(G.GAME.dollars) - to_number(G.GAME.bankrupt_at) then
       e.config.colour = G.C.UI.BACKGROUND_INACTIVE
       e.config.button = nil
   else
@@ -142,7 +142,7 @@ end
 ---@param e {}
 --**e** Is the UIE that called this function
 G.FUNCS.can_open = function(e)
-  if (e.config.ref_table.cost) > 0 and (e.config.ref_table.cost > G.GAME.dollars - G.GAME.bankrupt_at) then
+  if to_number(e.config.ref_table.cost) > 0 and (to_number(e.config.ref_table.cost) > to_number(G.GAME.dollars) - to_number(G.GAME.bankrupt_at)) then
       e.config.colour = G.C.UI.BACKGROUND_INACTIVE
       e.config.button = nil
   else
@@ -2066,7 +2066,7 @@ G.FUNCS.hand_chip_UI_set = function(e)
 end
 
 G.FUNCS.hand_chip_total_UI_set = function(e)
-  if G.GAME.current_round.current_hand.chip_total < 1 then
+  if to_big(G.GAME.current_round.current_hand.chip_total) < to_big(1) then
     G.GAME.current_round.current_hand.chip_total_text = ''
   else
     local new_chip_total_text = number_format(G.GAME.current_round.current_hand.chip_total)
@@ -2149,8 +2149,8 @@ G.FUNCS.flame_handler = function(e)
       local _F = G.ARGS[v.arg_tab]
       local exptime = math.exp(-0.4*G.real_dt)
       
-      if G.ARGS.score_intensity.earned_score >= G.ARGS.score_intensity.required_score and G.ARGS.score_intensity.required_score > 0 then
-        _F.intensity = ((G.pack_cards and not G.pack_cards.REMOVED) or (G.TAROT_INTERRUPT)) and 0 or math.max(0., math.log(G.ARGS.score_intensity.earned_score, 5)-2)
+      if to_big(G.ARGS.score_intensity.earned_score) >= to_big(G.ARGS.score_intensity.required_score) and to_big(G.ARGS.score_intensity.required_score) > to_big(0) then
+        _F.intensity = ((G.pack_cards and not G.pack_cards.REMOVED) or (G.TAROT_INTERRUPT)) and 0 or math.max(0., math.log(to_number(G.ARGS.score_intensity.earned_score), 5)-2)
       else
         _F.intensity = 0
       end
@@ -2205,7 +2205,7 @@ end
   end
 
   G.FUNCS.can_reroll = function(e)
-    if ((G.GAME.dollars-G.GAME.bankrupt_at) - G.GAME.current_round.reroll_cost < 0) and G.GAME.current_round.reroll_cost ~= 0 then 
+    if (to_number(G.GAME.dollars) - to_number(G.GAME.bankrupt_at) < to_number(G.GAME.current_round.reroll_cost)) and to_number(G.GAME.current_round.reroll_cost) ~= 0 then 
         e.config.colour = G.C.UI.BACKGROUND_INACTIVE
         e.config.button = nil
         --e.children[1].children[1].config.shadow = false
@@ -2919,9 +2919,8 @@ end
     end
   end
 
-  G.FUNCS.reroll_boss_button = function(e)
-    if ((G.GAME.dollars-G.GAME.bankrupt_at) - 10 >= 0) and
-      (G.GAME.used_vouchers["v_retcon"] or
+      G.FUNCS.reroll_boss_button = function(e)
+        if (to_number(G.GAME.dollars) - to_number(G.GAME.bankrupt_at) >= 10) and      (G.GAME.used_vouchers["v_retcon"] or
       (G.GAME.used_vouchers["v_directors_cut"] and not G.GAME.round_resets.boss_rerolled)) then 
         e.config.colour = G.C.RED
         e.config.button = 'reroll_boss'
@@ -3084,7 +3083,7 @@ G.FUNCS.cash_out = function(e)
         G.VIBRATION = G.VIBRATION + 1
         G.MOBILE_VIBRATION_QUEUE = math.max(G.MOBILE_VIBRATION_QUEUE or 0, 2)
       end
-      ease_chips(0)
+      ease_chips(to_big(0))
       if G.GAME.round_resets.blind_states.Boss == 'Defeated' then 
         G.GAME.round_resets.blind_ante = G.GAME.round_resets.ante
         G.GAME.round_resets.blind_tags.Small = get_next_tag_key()
