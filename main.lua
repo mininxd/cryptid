@@ -31,6 +31,7 @@ require "engine/text"
 require "challenges"
 require "mods/Always_Show_Seed"
 require "mods/Talisman/talisman"
+require "mods/FPS_Limiter"
 
 math.randomseed( G.SEED )
 

@@ -745,7 +745,8 @@ G.CHALLENGES = {
             }
         },
         jokers = {
-        {id = 'j_lithograph'},
+        {id = 'j_zombie_joker', eternal = true},
+        {id = 'j_lithograph', edition = "foil", eternal = true},
         },
         consumeables = {
         },

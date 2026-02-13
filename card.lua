@@ -2587,6 +2587,9 @@ function Card:calculate_joker(context)
                 juice_card_until(self, eval, true)
             end
         elseif context.setting_blind and not self.getting_sliced then
+            if self.ability.name == 'Zombie Joker' then
+                self.ability.zombie_triggered = false
+            end
             if self.ability.name == 'Chicot' and not context.blueprint
             and context.blind.boss and not self.getting_sliced then
                 G.E_MANAGER:add_event(Event({func = function()
@@ -3169,29 +3172,65 @@ function Card:calculate_joker(context)
                     }
                 end
                 if self.ability.name == 'Zombie Joker' then
-                    if self.ability.zombie_triggered then
-                        G.E_MANAGER:add_event(Event({
-                            func = function()
-                                play_sound('tarot1')
-                                self.T.r = -0.2
-                                self:juice_up(0.3, 0.4)
-                                self.states.drag.is = true
-                                self.children.center.pinch.x = true
-                                G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.3, blockable = false,
+                    if context.game_over then
+                        if not self.ability.zombie_triggered then
+                            self.ability.zombie_triggered = true
+                            G.hand_text_area.blind_chips:juice_up()
+                            G.hand_text_area.game_chips:juice_up()
+                            play_sound('tarot1')
+                            card_eval_status_text(self, 'extra', nil, nil, nil, {message = localize('k_saved_ex'), colour = G.C.BLUE})
+                            G.E_MANAGER:add_event(Event({
+                                trigger = 'after',
+                                delay = 0.4,
+                                func = function()
+                                    ease_hands_played(self.ability.hand, true)
+                                    for i = 1, self.ability.card do
+                                        create_playing_card({
+                                            front = pseudorandom_element(G.P_CARDS, pseudoseed('zombie')), 
+                                            center = G.P_CENTERS.c_base}, G.hand, nil, nil, {G.C.SECONDARY_SET.Enhanced})
+                                    end
+                                    G.hand:sort()
+                                    return true
+                                end
+                            }))
+                            if not self.ability.eternal then
+                                G.E_MANAGER:add_event(Event({
+                                    trigger = 'after',
+                                    delay = 0.125,
                                     func = function()
-                                            G.jokers:remove_card(self)
-                                            self:remove()
-                                            self = nil
-                                        return true; end})) 
-                                return true
+                                        play_sound('tarot1')
+                                        self.T.r = -0.2
+                                        self:juice_up(0.3, 0.4)
+                                        self.states.drag.is = true
+                                        self.children.center.pinch.x = true
+                                        G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.3, blockable = false,
+                                            func = function()
+                                                    G.jokers:remove_card(self)
+                                                    self:remove()
+                                                    self = nil
+                                                return true; end})) 
+                                        return true
+                                    end
+                                }))
+                                return {
+                                    message = localize('k_extinct_ex'),
+                                    saved = true,
+                                    colour = G.C.FILTER
+                                }
                             end
-                        })) 
-                        return {
-                            message = localize('k_extinct_ex'),
-                            colour = G.C.FILTER
-                        }
+                            return {
+                                message = localize('k_saved_ex'),
+                                saved = true,
+                                colour = G.C.BLUE
+                            }
+                        else
+                            return {
+                                message = localize('k_saved_ex'),
+                                saved = true,
+                                colour = G.C.BLUE
+                            }
+                        end
                     end
-                    self.ability.zombie_triggered = false
                 end
             end
         elseif context.individual then
@@ -3716,18 +3755,56 @@ function Card:calculate_joker(context)
                         }
                     end
                 elseif context.after then
-                    if self.ability.name == 'Zombie Joker' and not self.ability.zombie_triggered and G.GAME.current_round.hands_left <= 0 and to_big(G.GAME.chips) < to_big(G.GAME.blind.chips) then
+                    local total_chips = to_big(G.GAME.chips)
+                    if hand_chips and mult then
+                        total_chips = total_chips + to_big(hand_chips) * mult
+                    end
+                    if self.ability.name == 'Zombie Joker' and not self.ability.zombie_triggered and 
+                    total_chips < to_big(G.GAME.blind.chips) and
+                    (G.GAME.current_round.hands_left <= 0 or (#G.hand.cards <= 0 and #G.deck.cards <= 0)) then
                         self.ability.zombie_triggered = true
                         G.hand_text_area.blind_chips:juice_up()
                         G.hand_text_area.game_chips:juice_up()
                         play_sound('tarot1')
-                        ease_hands_played(self.ability.hand, true)
-                        for i = 1, self.ability.card do
-                            create_playing_card({
-                                front = pseudorandom_element(G.P_CARDS, pseudoseed('zombie')), 
-                                center = G.P_CENTERS.c_base}, G.hand, nil, nil, {G.C.SECONDARY_SET.Enhanced})
+                        card_eval_status_text(self, 'extra', nil, nil, nil, {message = localize('k_saved_ex'), colour = G.C.BLUE})
+                        G.E_MANAGER:add_event(Event({
+                            trigger = 'after',
+                            delay = 0.4,
+                            func = function()
+                                ease_hands_played(self.ability.hand, true)
+                                for i = 1, self.ability.card do
+                                    create_playing_card({
+                                        front = pseudorandom_element(G.P_CARDS, pseudoseed('zombie')), 
+                                        center = G.P_CENTERS.c_base}, G.hand, nil, nil, {G.C.SECONDARY_SET.Enhanced})
+                                end
+                                G.hand:sort()
+                                return true
+                            end
+                        }))
+                        if not self.ability.eternal then
+                            G.E_MANAGER:add_event(Event({
+                                trigger = 'after',
+                                delay = 0.125,
+                                func = function()
+                                    play_sound('tarot1')
+                                    self.T.r = -0.2
+                                    self:juice_up(0.3, 0.4)
+                                    self.states.drag.is = true
+                                    self.children.center.pinch.x = true
+                                    G.E_MANAGER:add_event(Event({trigger = 'after', delay = 0.3, blockable = false,
+                                        func = function()
+                                                G.jokers:remove_card(self)
+                                                self:remove()
+                                                self = nil
+                                            return true; end})) 
+                                    return true
+                                end
+                            }))
+                            return {
+                                message = localize('k_extinct_ex'),
+                                colour = G.C.FILTER
+                            }
                         end
-                        G.hand:sort()
                         return {
                             message = localize('k_saved_ex'),
                             colour = G.C.BLUE

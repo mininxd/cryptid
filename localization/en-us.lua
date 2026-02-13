@@ -1892,7 +1892,7 @@ return {
                     "Instead of losing, give {C:blue}+#1#{}",
                     "{C:blue}Hand{} & add {C:money}#2#{} random",
                     "{C:money}Cards{} to {C:money}Hand{}",
-                    "{C:red}Destroyed{} if ability used"
+                    "Destroyed if ability used"
                 },
             },
             j_lithograph={
