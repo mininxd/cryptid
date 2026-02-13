@@ -2293,6 +2293,14 @@ return {
                     "learn what it does",
                 },
             },
+            undiscovered_custom_tag={
+                name="Not Discovered",
+                text={
+                    "Use this tag in",
+                    "an unseeded run to",
+                    "learn what it does",
+                },
+            },
             undiscovered_tarot={
                 name="Not Discovered",
                 text={
@@ -2831,6 +2839,22 @@ return {
                 },
             },
         },
+        
+        -- custom tags
+        custom_tag={
+            tag_hyper_inflation={
+                name="Hyperinflation Tag",
+                text={
+                    "{X:mult,C:white}X#1#{} {C:money}Cash{}. but all", 
+                    "{C:money}purchases{} cost {C:red}double{}",
+                    "{C:grey}effect lasts for #2# rounds."
+                },
+            },
+        },
+        
+        
+        
+        -- Tarot
         Tarot={
             c_chariot={
                 name="The Chariot",
@@ -3544,6 +3568,7 @@ return {
             b_imagery="Imagery",
             b_jokers="Jokers",
             b_custom_jokers="Custom Jokers",
+            b_custom_tags="Custom Tags",
             b_load_profile="Load Profile",
             b_main_menu="Main Menu",
             b_music="Music",

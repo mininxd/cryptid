@@ -3637,6 +3637,7 @@ function create_UIBox_your_collection()
       UIBox_button({button = 'your_collection_editions', label = {localize('b_editions')}, count = G.DISCOVER_TALLIES.editions, minw = 5, id = 'your_collection_editions'}),
       UIBox_button({button = 'your_collection_boosters', label = {localize('b_booster_packs')}, count = G.DISCOVER_TALLIES.boosters, minw = 5, id = 'your_collection_boosters'}),
       UIBox_button({button = 'your_collection_tags', label = {localize('b_tags')}, count = G.DISCOVER_TALLIES.tags, minw = 5, id = 'your_collection_tags'}),
+      UIBox_button({button = 'your_collection_custom_tags', label = {localize('b_custom_tags')}, count = G.DISCOVER_TALLIES.custom_tag, minw = 5, id = 'your_collection_custom_tags'}),
       UIBox_button({button = 'your_collection_blinds', label = {localize('b_blinds')}, count = G.DISCOVER_TALLIES.blinds, minw = 5, minh = 2.0, id = 'your_collection_blinds', focus_args = {snap_to = true}}),
     }},
     
@@ -4071,7 +4072,66 @@ function create_UIBox_your_collection_tags()
   }
   local tag_tab = {}
   for k, v in pairs(G.P_TAGS) do
-    tag_tab[#tag_tab+1] = v
+    if v.set == 'Tag' and not v.is_custom then 
+        tag_tab[#tag_tab+1] = v
+    end
+  end
+
+  table.sort(tag_tab, function (a, b) return a.order < b.order end)
+
+  local tags_to_be_alerted = {}
+  for k, v in ipairs(tag_tab) do
+    local discovered = v.discovered
+    local temp_tag = Tag(v.key, true)
+    if not v.discovered then temp_tag.hide_ability = true end
+    local temp_tag_ui, temp_tag_sprite = temp_tag:generate_UI()
+    tag_matrix[math.ceil((k-1)/6+0.001)][1+((k-1)%6)] = {n=G.UIT.C, config={align = "cm", padding = 0.1}, nodes={
+      temp_tag_ui,
+    }}
+    if discovered and not v.alerted then 
+      tags_to_be_alerted[#tags_to_be_alerted+1] = temp_tag_sprite
+    end
+  end
+
+  G.E_MANAGER:add_event(Event({
+    trigger = 'immediate',
+    func = (function()
+        for _, v in ipairs(tags_to_be_alerted) do
+          v.children.alert = UIBox{
+            definition = create_UIBox_card_alert(), 
+            config = { align="tri", offset = {x = 0.1, y = 0.1}, parent = v}
+          }
+          v.children.alert.states.collide.can = false
+        end
+        return true
+    end)
+  }))
+
+
+  local t = create_UIBox_generic_options({ back_func = 'your_collection', contents = {
+    {n=G.UIT.C, config={align = "cm", r = 0.1, colour = G.C.BLACK, padding = 0.1, emboss = 0.05}, nodes={
+      {n=G.UIT.C, config={align = "cm"}, nodes={
+        {n=G.UIT.R, config={align = "cm"}, nodes={
+          {n=G.UIT.R, config={align = "cm"}, nodes=tag_matrix[1]},
+          {n=G.UIT.R, config={align = "cm"}, nodes=tag_matrix[2]},
+          {n=G.UIT.R, config={align = "cm"}, nodes=tag_matrix[3]},
+          {n=G.UIT.R, config={align = "cm"}, nodes=tag_matrix[4]},
+        }}
+      }} 
+    }}  
+  }})
+  return t
+end
+
+function create_UIBox_your_collection_custom_tags()
+  local tag_matrix = {
+    {},{},{},{},
+  }
+  local tag_tab = {}
+  for k, v in pairs(G.P_TAGS) do
+    if v.is_custom then 
+        tag_tab[#tag_tab+1] = v
+    end
   end
 
   table.sort(tag_tab, function (a, b) return a.order < b.order end)

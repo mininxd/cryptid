@@ -162,7 +162,7 @@ function Card:set_sprites(_center, _front)
     if _center then 
         if _center.set then
             if self.children.center then
-                self.children.center.atlas = G.ASSET_ATLAS[(_center.atlas or (_center.set == 'Joker' or _center.set == 'custom_joker' or _center.consumeable or _center.set == 'Voucher') and (_center.set == 'custom_joker' and 'custom_joker' or _center.set)) or 'centers']
+                self.children.center.atlas = G.ASSET_ATLAS[(_center.atlas or (_center.set == 'Joker' or _center.set == 'custom_joker' or _center.set == 'custom_tag' or _center.is_custom or _center.consumeable or _center.set == 'Voucher') and (_center.set == 'custom_joker' and 'custom_joker' or (_center.set == 'custom_tag' and 'custom_tags' or (_center.is_custom and 'custom_tags' or _center.set)))) or 'centers']
                 self.children.center:set_sprite_pos(_center.pos)
             else
                 if _center.set == 'Joker' and not _center.unlocked and not self.params.bypass_discovery_center then 
@@ -173,8 +173,8 @@ function Card:set_sprites(_center, _front)
                     self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS["Voucher"], G.v_locked.pos)
                 elseif self.config.center.consumeable and self.config.center.demo then 
                     self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS["Tarot"], G.c_locked.pos)
-                elseif not self.params.bypass_discovery_center and (_center.set == 'Edition' or _center.set == 'Joker' or _center.set == 'custom_joker' or _center.consumeable or _center.set == 'Voucher' or _center.set == 'Booster') and not _center.discovered then 
-                    self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS[_center.atlas or (_center.set == 'custom_joker' and 'custom_joker' or _center.set)], 
+                elseif not self.params.bypass_discovery_center and (_center.set == 'Edition' or _center.set == 'Joker' or _center.set == 'custom_joker' or _center.set == 'custom_tag' or _center.is_custom or _center.consumeable or _center.set == 'Voucher' or _center.set == 'Booster') and not _center.discovered then 
+                    self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS[_center.atlas or (_center.set == 'custom_joker' and 'custom_joker' or (_center.set == 'custom_tag' and 'custom_tags' or (_center.is_custom and 'custom_tags' or _center.set)))], 
                     (_center.set == 'Joker' and G.j_undiscovered.pos) or 
                     (_center.set == 'custom_joker' and G.j_undiscovered.pos) or 
                     (_center.set == 'Edition' and G.j_undiscovered.pos) or 
@@ -182,9 +182,11 @@ function Card:set_sprites(_center, _front)
                     (_center.set == 'Planet' and G.p_undiscovered.pos) or 
                     (_center.set == 'Spectral' and G.s_undiscovered.pos) or 
                     (_center.set == 'Voucher' and G.v_undiscovered.pos) or 
+                    (_center.set == 'custom_tag' and G.tag_undiscovered.pos) or 
+                    (_center.is_custom and G.tag_undiscovered.pos) or 
                     (_center.set == 'Booster' and G.booster_undiscovered.pos))
-                elseif _center.set == 'Joker' or _center.set == 'custom_joker' or _center.consumeable or _center.set == 'Voucher' then
-                    self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS[(_center.set == 'custom_joker' and 'custom_joker' or _center.set)], self.config.center.pos)
+                elseif _center.set == 'Joker' or _center.set == 'custom_joker' or _center.set == 'custom_tag' or _center.is_custom or _center.consumeable or _center.set == 'Voucher' then
+                    self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS[(_center.set == 'custom_joker' and 'custom_joker' or (_center.set == 'custom_tag' and 'custom_tags' or (_center.is_custom and 'custom_tags' or _center.set)))], self.config.center.pos)
                 else
                     self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.ASSET_ATLAS[_center.atlas or 'centers'], _center.pos)
                 end
@@ -349,6 +351,7 @@ function Card:set_ability(center, initial, delay_sprites)
     self.label = center.label or self.config.card.label or self.ability.set
     if self.ability.set == 'Joker' then self.label = self.ability.name end
     if self.ability.set == 'custom_joker' then self.label = self.ability.name end
+    if self.ability.set == 'custom_tag' or self.ability.is_custom then self.label = self.ability.name end
     if self.ability.set == 'Edition' then self.label = self.ability.name end
     if self.ability.consumeable then self.label = self.ability.name end
     if self.ability.set == 'Voucher' then self.label = self.ability.name end
@@ -384,6 +387,7 @@ function Card:set_cost()
         (self.edition.polychrome and 5 or 0) + (self.edition.negative and 5 or 0)
     end
     self.cost = math.max(1, math.floor((self.base_cost + self.extra_cost + 0.5)*(100-G.GAME.discount_percent)/100))
+    if G.GAME.hyper_inflation and G.GAME.hyper_inflation > 0 then self.cost = self.cost * 2 end
     if self.ability.set == 'Booster' and G.GAME.modifiers.booster_ante_scaling then self.cost = self.cost + G.GAME.round_resets.ante - 1 end
     if self.ability.set == 'Booster' and (not G.SETTINGS.tutorial_complete) and G.SETTINGS.tutorial_progress and (not G.SETTINGS.tutorial_progress.completed_parts['shop_1']) then
         self.cost = self.cost + 3
@@ -723,7 +727,7 @@ function Card:generate_UIBox_ability_table()
     local no_badge = nil
     
     if not self.bypass_lock and self.config.center.unlocked ~= false and
-    (self.ability.set == 'Joker' or self.ability.set == 'custom_joker' or self.ability.set == 'Edition' or self.ability.consumeable or self.ability.set == 'Voucher' or self.ability.set == 'Booster') and
+    (self.ability.set == 'Joker' or self.ability.set == 'custom_joker' or self.ability.set == 'custom_tag' or self.ability.set == 'Edition' or self.ability.consumeable or self.ability.set == 'Voucher' or self.ability.set == 'Booster') and
     not self.config.center.discovered and 
     ((self.area ~= G.jokers and self.area ~= G.consumeables and self.area) or not self.area) then
         card_type = 'Undiscovered'
@@ -740,8 +744,9 @@ function Card:generate_UIBox_ability_table()
                     nominal_chips = self.base.nominal > 0 and self.base.nominal or nil,
                     bonus_chips = (self.ability.bonus + (self.ability.perma_bonus or 0)) > 0 and (self.ability.bonus + (self.ability.perma_bonus or 0)) or nil,
                 }
-    elseif self.ability.set == 'Joker' or self.ability.set == 'custom_joker' then -- all remaining jokers
-        if self.ability.name == 'Joker' then loc_vars = {self.ability.mult}
+    elseif self.ability.set == 'Joker' or self.ability.set == 'custom_joker' or self.ability.set == 'custom_tag' or self.ability.is_custom then -- all remaining jokers
+        if self.ability.name == 'Hyperinflation Tag' then loc_vars = {self.ability.mult_dollars, self.ability.last_effect}
+        elseif self.ability.name == 'Joker' then loc_vars = {self.ability.mult}
         elseif self.ability.name == 'Super Joker' then loc_vars = {self.ability.mult}
         elseif self.ability.name == 'Aura Farming' then loc_vars = {self.ability.extra, 0.1, self.ability.mult, self.ability.x_mult}
         elseif self.ability.name == 'Jolly Joker' or self.ability.name == 'Zany Joker' or
@@ -4675,7 +4680,7 @@ function Card:draw(layer)
 
             --If the card is not yet discovered
             if not self.config.center.discovered and (self.ability.consumeable or self.config.center.unlocked) and not self.config.center.demo and not self.bypass_discovery_center then
-                local shared_sprite = (self.ability.set == 'Edition' or self.ability.set == 'Joker' or self.ability.set == 'custom_joker') and G.shared_undiscovered_joker or G.shared_undiscovered_tarot
+                local shared_sprite = (self.ability.set == 'Edition' or self.ability.set == 'Joker' or self.ability.set == 'custom_joker' or self.ability.set == 'custom_tag') and G.shared_undiscovered_joker or G.shared_undiscovered_tarot
                 local scale_mod = -0.05 + 0.05*math.sin(1.8*G.TIMERS.REAL)
                 local rotate_mod = 0.03*math.sin(1.219*G.TIMERS.REAL)
 

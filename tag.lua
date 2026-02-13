@@ -188,6 +188,17 @@ function Tag:apply_to_run(_context)
                 self.triggered = true
                 return true
             end
+            if self.key == 'tag_hyper_inflation' then
+                self:yep('+', G.C.MONEY,function() 
+                    G.CONTROLLER.locks[lock] = nil
+                    return true
+                end)
+                local total_money = G.GAME.dollars * self.config.mult_dollars
+                ease_dollars(math.ceil(total_money) - G.GAME.dollars)
+                G.GAME.hyper_inflation = (G.GAME.hyper_inflation or 0) + self.config.last_effect
+                self.triggered = true
+                return true
+            end
             if self.name == 'Orbital Tag' then
                 update_hand_text({sound = 'button', volume = 0.7, pitch = 0.8, delay = 0.3}, {
                     handname= self.ability.orbital_hand,
@@ -495,7 +506,8 @@ function Tag:generate_UI(_size)
 
     local tag_sprite_tab = nil
 
-    local tag_sprite = Sprite(0,0,_size*1,_size*1,G.ASSET_ATLAS["tags"], (self.hide_ability) and G.tag_undiscovered.pos or self.pos)
+    local _atlas = (G.P_TAGS[self.key] and (G.P_TAGS[self.key].set == 'custom_tag' or G.P_TAGS[self.key].is_custom)) and "custom_tags" or "tags"
+    local tag_sprite = Sprite(0,0,_size*1,_size*1,G.ASSET_ATLAS[_atlas], (self.hide_ability) and G.tag_undiscovered.pos or self.pos)
     tag_sprite.T.scale = 1
     tag_sprite_tab = {n= G.UIT.C, config={align = "cm", ref_table = self, group = self.tally}, nodes={
         {n=G.UIT.O, config={w=_size*1,h=_size*1, colour = G.C.BLUE, object = tag_sprite, focus_with_object = true}},

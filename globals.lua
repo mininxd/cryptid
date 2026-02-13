@@ -474,6 +474,7 @@ function Game:set_globals()
             Spectral = HEX('424e54'),
             Voucher = HEX("424e54"),
             custom_joker = HEX('424e54'),
+            custom_tag = HEX('424e54'),
         }, 
         SECONDARY_SET = {
             Default = HEX("9bb6bdFF"),
@@ -485,6 +486,7 @@ function Game:set_globals()
             Voucher = HEX("fd682b"),
             Edition = HEX("4ca893"),
             custom_joker = HEX('708b91'),
+            custom_tag = HEX('708b91'),
         }, 
         RARITY = {
             HEX('009dff'),--HEX("708b91"),

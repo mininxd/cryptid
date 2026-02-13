@@ -1054,7 +1054,8 @@ function add_round_eval_row(config)
                         }}
                     }}) 
                 elseif string.find(config.name, 'tag') then
-                    local blind_sprite = Sprite(0, 0, 0.7,0.7, G.ASSET_ATLAS['tags'], copy_table(config.pos))
+                    local _atlas = (config.tag and G.P_TAGS[config.tag.key] and (G.P_TAGS[config.tag.key].set == 'custom_tag' or G.P_TAGS[config.tag.key].is_custom)) and "custom_tags" or "tags"
+                    local blind_sprite = Sprite(0, 0, 0.7,0.7, G.ASSET_ATLAS[_atlas], copy_table(config.pos))
                     blind_sprite:define_draw_steps({
                         {shader = 'dissolve', shadow_height = 0.05},
                         {shader = 'dissolve'}
@@ -2681,6 +2682,12 @@ function generate_card_ui(_c, full_UI_table, specific_vars, card_type, badges, h
             end
         end
         localize{type = 'descriptions', key = _c.key, set = _c.set, nodes = desc_nodes, vars = vars or {}}
+    elseif _c.set == 'custom_tag' or _c.is_custom then
+        local vars = specific_vars or loc_vars
+        if not vars or not vars[1] then
+            if _c.key == 'tag_hyper_inflation' then vars = {_c.config.mult_dollars, _c.config.last_effect} end
+        end
+        localize{type = 'descriptions', key = _c.key, set = 'custom_tag', nodes = desc_nodes, vars = vars or {}}
     elseif _c.set == 'Tag' then
         if _c.name == 'Negative Tag' then info_queue[#info_queue+1] = G.P_CENTERS.e_negative
         elseif _c.name == 'Foil Tag' then info_queue[#info_queue+1] = G.P_CENTERS.e_foil 

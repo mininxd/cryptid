@@ -1607,10 +1607,15 @@ end
 G.FUNCS.your_collection_tags = function(e)
   G.SETTINGS.paused = true
   G.FUNCS.overlay_menu{
-    definition = create_UIBox_your_collection_tags(),
+      definition = create_UIBox_your_collection_tags(),
   }
 end
-
+G.FUNCS.your_collection_custom_tags = function(e)
+  G.SETTINGS.paused = true
+  G.FUNCS.overlay_menu{
+      definition = create_UIBox_your_collection_custom_tags(),
+  }
+end
 G.FUNCS.your_collection_seals = function(e)
   G.SETTINGS.paused = true
   G.FUNCS.overlay_menu{

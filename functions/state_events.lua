@@ -1402,6 +1402,10 @@ G.FUNCS.evaluate_round = function()
     pitch = pitch + 0.06
 
     add_round_eval_row({name = 'bottom', dollars = dollars})
+
+    if G.GAME.hyper_inflation and G.GAME.hyper_inflation > 0 then 
+        G.GAME.hyper_inflation = G.GAME.hyper_inflation - 1
+    end
 end
 
 G.FUNCS.tutorial_controller = function()

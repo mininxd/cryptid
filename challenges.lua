@@ -741,12 +741,12 @@ G.CHALLENGES = {
         rules = {
             custom = {},
             modifiers = {
-                {id = 'joker_slots', value = 5},
+                {id = 'joker_slots', value = 20},
             }
         },
         jokers = {
-        {id = 'j_zombie_joker', eternal = true},
-        {id = 'j_lithograph', edition = "foil", eternal = true},
+        {id = 'j_zombie_joker'},
+        {id = 'j_lithograph'},
         },
         consumeables = {
         },
@@ -754,7 +754,6 @@ G.CHALLENGES = {
         },
         deck = {
             type = 'Challenge Deck',
-        cards = {{s='D',r='2',},{s='D',r='3',},{s='D',r='4',},{s='D',r='5',},{s='D',r='6',},{s='D',r='7',},{s='D',r='8',},{s='D',r='9',},{s='D',r='T',},{s='D',r='J',e='m_stone',},},
         },
         restrictions = {
             banned_cards = {},

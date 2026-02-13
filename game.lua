@@ -249,7 +249,13 @@ function Game:init_item_prototypes()
         tag_skip =          {name = 'Skip Tag',         set = 'Tag', discovered = false, min_ante = nil, order = 22, config = {type = 'immediate', skip_bonus = 5}, pos = {x = 0,y = 3}},
         tag_orbital =       {name = 'Orbital Tag',      set = 'Tag', discovered = false, min_ante = 2,   order = 23, config = {type = 'immediate', levels = 3}, pos = {x = 5,y = 2}},
         tag_economy =       {name = 'Economy Tag',      set = 'Tag', discovered = false, min_ante = nil, order = 24, config = {type = 'immediate', max = 40}, pos = {x = 4,y = 3}},
+
+        -- Custom Tags
+        tag_hyper_inflation =   {name = 'Hyperinflation Tag',  set = 'Tag', is_custom = true, start_discovered = true, min_ante = nil, order = 1, config = {type = 'immediate', mult_dollars = 1.5, last_effect = 5}, pos = {x = 0,y = 0}},
     }
+    
+    
+    
     self.tag_undiscovered = self.tag_undiscovered or {name = 'Not Discovered', order = 1, config = {type = ''}, pos = {x=3,y=4}}
 
     self.P_STAKES = self.P_STAKES or {
@@ -731,6 +737,7 @@ function Game:init_item_prototypes()
         Voucher = {},
         Back = {},
         Tag = {},
+        custom_tag = {},
         Seal = {},
         Stake = {},
         Demo = {}
@@ -818,7 +825,8 @@ function Game:init_item_prototypes()
             elseif v.discovered then
                 v.alerted = false
             end
-            table.insert(self.P_CENTER_POOLS['Tag'], v)
+            if v.set == 'Tag' then table.insert(self.P_CENTER_POOLS['Tag'], v) end
+            if v.is_custom then table.insert(self.P_CENTER_POOLS['custom_tag'], v) end
         end
     end
     for k, v in pairs(self.P_SEALS) do
@@ -872,6 +880,7 @@ function Game:init_item_prototypes()
     table.sort(self.P_CENTER_POOLS["Enhanced"], function (a, b) return a.order < b.order end)
     table.sort(self.P_CENTER_POOLS["Stake"], function (a, b) return a.order < b.order end)
     table.sort(self.P_CENTER_POOLS["Tag"], function (a, b) return a.order < b.order end)
+    table.sort(self.P_CENTER_POOLS["custom_tag"], function (a, b) return a.order < b.order end)
     table.sort(self.P_CENTER_POOLS["Seal"], function (a, b) return a.order < b.order end)
     table.sort(self.P_CENTER_POOLS["Demo"], function (a, b) return a.order + (a.set == 'Joker' and 1000 or 0) < b.order + (b.set == 'Joker' and 1000 or 0) end)
     for i = 1, 4 do 
@@ -1010,6 +1019,7 @@ function Game:set_render_settings()
         {name = 'gamepad_ui', path = "resources/textures/"..self.SETTINGS.GRAPHICS.texture_scaling.."x/gamepad_ui.png",px=32,py=32},
         {name = 'icons', path = "resources/textures/"..self.SETTINGS.GRAPHICS.texture_scaling.."x/icons.png",px=66,py=66},
         {name = 'tags', path = "resources/textures/"..self.SETTINGS.GRAPHICS.texture_scaling.."x/tags.png",px=34,py=34},
+        {name = 'custom_tags', path = "resources/textures/"..self.SETTINGS.GRAPHICS.texture_scaling.."x/custom_tags.png",px=34,py=34},
         {name = 'stickers', path = "resources/textures/"..self.SETTINGS.GRAPHICS.texture_scaling.."x/stickers.png",px=71,py=95},
         {name = 'chips', path = "resources/textures/"..self.SETTINGS.GRAPHICS.texture_scaling.."x/chips.png",px=29,py=29},
 

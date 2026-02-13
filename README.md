@@ -9,6 +9,11 @@
 | Zombie Joker | Instead of losing, gives **+1 Hand** and adds **5** random cards to hand. Destroyed at end of round if triggered. | uncommon |
 | Lithograph | **Stone Cards** give **+6 Mult**. | common |
 
+## Custom Tags
+| Name        | Description | Type |
+|------------|-------------|--------|
+| Hyperinflation Tag | **X1.5** Cash, but all purchases cost **double**. Effect lasts for **5** rounds. | immediate |
+
 ## Unique Mods
 | Name | Description | Source |
 |------|-------------|--------|

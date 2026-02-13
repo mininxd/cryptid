@@ -1322,6 +1322,7 @@ function set_discover_tallies()
   G.DISCOVER_TALLIES = G.DISCOVER_TALLIES or {
       blinds = {tally = 0, of = 0},
       tags = {tally = 0, of = 0},
+      custom_tag = {tally = 0, of = 0},
       jokers = {tally = 0, of = 0},
       custom_joker = {tally = 0, of = 0},
       consumeables = {tally = 0, of = 0},
@@ -1417,10 +1418,18 @@ function set_discover_tallies()
   end
   for _, v in pairs(G.P_TAGS) do
     G.DISCOVER_TALLIES.total.of = G.DISCOVER_TALLIES.total.of+1
-    G.DISCOVER_TALLIES.tags.of = G.DISCOVER_TALLIES.tags.of+1
-    if v.discovered then 
-        G.DISCOVER_TALLIES.tags.tally = G.DISCOVER_TALLIES.tags.tally+1
-        G.DISCOVER_TALLIES.total.tally = G.DISCOVER_TALLIES.total.tally+1
+    if v.set == 'Tag' and not v.is_custom then 
+        G.DISCOVER_TALLIES.tags.of = G.DISCOVER_TALLIES.tags.of+1
+        if v.discovered then 
+            G.DISCOVER_TALLIES.tags.tally = G.DISCOVER_TALLIES.tags.tally+1
+            G.DISCOVER_TALLIES.total.tally = G.DISCOVER_TALLIES.total.tally+1
+        end
+    elseif v.is_custom then
+        G.DISCOVER_TALLIES.custom_tag.of = G.DISCOVER_TALLIES.custom_tag.of+1
+        if v.discovered then 
+            G.DISCOVER_TALLIES.custom_tag.tally = G.DISCOVER_TALLIES.custom_tag.tally+1
+            G.DISCOVER_TALLIES.total.tally = G.DISCOVER_TALLIES.total.tally+1
+        end
     end
   end
   G.PROFILES[G.SETTINGS.profile].high_scores.collection.amt = G.DISCOVER_TALLIES.total.tally
