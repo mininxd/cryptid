@@ -273,7 +273,7 @@ function Big:normalize()
             b=true;
         end
         while (((x.array[1] or 0) < math.log(R.MAX_DISP_INTEGER,10)) and ((x.array[2] ~= nil) and (x.array[2] ~= 0))) do
-            x.array[1] = math.pow(10,x.array[1], 10);
+            x.array[1] = math.pow(10,x.array[1]);
             x.array[2] = x.array[2] - 1
             b=true;
         end
@@ -334,14 +334,15 @@ function Big:toString()
     end
     if (self.array[2] == nil) or (self.array[2] == 0) then
         if (self.array[1] <= 9e9) then
-            s = s .. AThousandNotation(self.array[1], 2)
+            s = s .. AThousandNotation(self.array[1], (self.array[1] == math.floor(self.array[1])) and 0 or 2)
         else
             local exponent = math.floor(math.log(self.array[1], 10))
             local mantissa = math.floor((self.array[1] / (10^exponent))*100)/100
-            s = s .. AThousandNotation(mantissa, 2) .. "e" .. AThousandNotation(exponent, 0)
+            s = s .. AThousandNotation(mantissa, (mantissa == math.floor(mantissa)) and 0 or 2) .. "e" .. AThousandNotation(exponent, 0)
         end
     elseif (self.array[2]<3) then
-        s = s .. string.rep("e", self.array[2]-1) .. AThousandNotation(math.pow(10,self.array[1]-math.floor(self.array[1])), 2) .. "e" .. AThousandNotation(math.floor(self.array[1]), 0);
+        local mantissa = math.pow(10,self.array[1]-math.floor(self.array[1]))
+        s = s .. string.rep("e", self.array[2]-1) .. AThousandNotation(mantissa, (mantissa == math.floor(mantissa)) and 0 or 2) .. "e" .. AThousandNotation(math.floor(self.array[1]), 0);
     elseif (self.array[2]<8) then
         s = s .. string.rep("e", self.array[2]) .. AThousandNotation(self.array[1], 0)
     else
@@ -355,6 +356,9 @@ function log10LongString(str)
 end
 
 function Big:parse(input)
+    if type(input) == "string" then
+        input = input:gsub(",", "")
+    end
     -- if (typeof input!="string") throw Error(invalidArgument+"Expected String");
     -- var isJSON=false;
     -- if (typeof input=="string"&&(input[0]=="["||input[0]=="{")){
@@ -610,8 +614,11 @@ function Big:create(input)
         return Big:new({input})
     elseif ((type(input) == "string")) then
         return Big:parse(input)
-    elseif ((type(input) == "table") and getmetatable(input) == OmegaMeta) then
-        return input:clone()
+    elseif ((type(input) == "table") and (getmetatable(input) == OmegaMeta or input.array)) then
+        if getmetatable(input) == OmegaMeta then return input:clone() end
+        local res = Big:new(input.array)
+        res.sign = input.sign or 1
+        return res
     else
         return Big:new(input)
     end

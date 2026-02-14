@@ -21,10 +21,14 @@ G.FUNCS.blueprint_compat = function(e)
   if e.config.ref_table.ability.blueprint_compat ~= e.config.ref_table.ability.blueprint_compat_check then 
     if e.config.ref_table.ability.blueprint_compat == 'compatible' then 
         e.config.colour = mix_colours(G.C.GREEN, G.C.JOKER_GREY, 0.8)
+    elseif e.config.ref_table.ability.blueprint_compat == 'warn' then 
+        e.config.colour = mix_colours(G.C.ORANGE, G.C.JOKER_GREY, 0.8)
     elseif e.config.ref_table.ability.blueprint_compat == 'incompatible' then
         e.config.colour = mix_colours(G.C.RED, G.C.JOKER_GREY, 0.8)
     end
-    e.config.ref_table.ability.blueprint_compat_ui = ' '..localize('k_'..e.config.ref_table.ability.blueprint_compat)..' '
+    local loc_key = e.config.ref_table.ability.blueprint_compat
+    if loc_key == 'warn' then loc_key = 'compatible' end
+    e.config.ref_table.ability.blueprint_compat_ui = ' '..localize('k_'..loc_key)..' '
     e.config.ref_table.ability.blueprint_compat_check = e.config.ref_table.ability.blueprint_compat
   end
 end

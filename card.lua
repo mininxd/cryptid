@@ -924,6 +924,15 @@ function Card:generate_UIBox_ability_table()
                     }}
                 }}
             } or nil
+        elseif self.ability.name == 'Boilerplate' then
+            self.ability.blueprint_compat_ui = self.ability.blueprint_compat_ui or ''; self.ability.blueprint_compat_check = nil
+            main_end = (self.area and self.area == G.jokers) and {
+                {n=G.UIT.C, config={align = "bm", minh = 0.4}, nodes={
+                    {n=G.UIT.C, config={ref_table = self, align = "m", colour = G.C.JOKER_GREY, r = 0.05, padding = 0.06, func = 'blueprint_compat'}, nodes={
+                        {n=G.UIT.T, config={ref_table = self.ability, ref_value = 'blueprint_compat_ui',colour = G.C.UI.TEXT_LIGHT, scale = 0.32*0.8}},
+                    }}
+                }}
+            } or nil
         elseif self.ability.name == 'Satellite' then
             local planets_used = 0
             for k, v in pairs(G.GAME.consumeable_usage) do if v.set == 'Planet' then planets_used = planets_used + 1 end end
@@ -2390,7 +2399,7 @@ function Card:calculate_joker(context)
     if (self.ability.set == "Joker" or self.ability.set == "custom_joker") and not self.debuff then
         if self.ability.name == 'Super Joker' and context.joker_main then
             return {
-                message = localize{type='variable',key='a_mult',vars={self.ability.mult}},
+                message = localize{type='variable',key='a_mult',vars={lenient_bignum(self.ability.mult)}},
                 mult_mod = self.ability.mult
             }
         end
@@ -2398,7 +2407,7 @@ function Card:calculate_joker(context)
             return {
                 mult_mod = self.ability.mult,
                 Xmult_mod = self.ability.x_mult,
-                message = localize{type='variable',key='a_mult',vars={self.ability.mult}}
+                message = localize{type='variable',key='a_mult',vars={lenient_bignum(self.ability.mult)}}
             }
         end
         if self.ability.name == "Blueprint" then
@@ -2407,12 +2416,14 @@ function Card:calculate_joker(context)
                 if G.jokers.cards[i] == self then other_joker = G.jokers.cards[i+1] end
             end
             if other_joker and other_joker ~= self then
-                context.blueprint = (context.blueprint and (context.blueprint + 1)) or 1
-                context.blueprint_card = context.blueprint_card or self
-                if context.blueprint > #G.jokers.cards + 1 then return end
-                local other_joker_ret = other_joker:calculate_joker(context)
+                local local_context = {}
+                for k, v in pairs(context) do local_context[k] = v end
+                local_context.blueprint = (local_context.blueprint and (local_context.blueprint + 1)) or 1
+                local_context.blueprint_card = local_context.blueprint_card or self
+                if local_context.blueprint > #G.jokers.cards + 1 then return end
+                local other_joker_ret = other_joker:calculate_joker(local_context)
                 if other_joker_ret then 
-                    other_joker_ret.card = context.blueprint_card or self
+                    other_joker_ret.card = local_context.blueprint_card or self
                     other_joker_ret.colour = G.C.BLUE
                     return other_joker_ret
                 end
@@ -2421,15 +2432,120 @@ function Card:calculate_joker(context)
         if self.ability.name == "Brainstorm" then
             local other_joker = G.jokers.cards[1]
             if other_joker and other_joker ~= self then
-                context.blueprint = (context.blueprint and (context.blueprint + 1)) or 1
-                context.blueprint_card = context.blueprint_card or self
-                if context.blueprint > #G.jokers.cards + 1 then return end
-                local other_joker_ret = other_joker:calculate_joker(context)
+                local local_context = {}
+                for k, v in pairs(context) do local_context[k] = v end
+                local_context.blueprint = (local_context.blueprint and (local_context.blueprint + 1)) or 1
+                local_context.blueprint_card = local_context.blueprint_card or self
+                if local_context.blueprint > #G.jokers.cards + 1 then return end
+                local other_joker_ret = other_joker:calculate_joker(local_context)
                 if other_joker_ret then 
-                    other_joker_ret.card = context.blueprint_card or self
+                    other_joker_ret.card = local_context.blueprint_card or self
                     other_joker_ret.colour = G.C.RED
                     return other_joker_ret
                 end
+            end
+        end
+        if self.ability.name == "Boilerplate" then
+            local left_joker = nil
+            local right_joker = nil
+            for i = 1, #G.jokers.cards do
+                if G.jokers.cards[i] == self then 
+                    left_joker = G.jokers.cards[i-1]
+                    right_joker = G.jokers.cards[i+1]
+                end
+            end
+            
+            local function copy_and_halve(other_joker)
+                if other_joker and other_joker ~= self and other_joker ~= context.blueprint_card then
+                    -- Specifically skip copiers that are targeting this Boilerplate to prevent loops and double-halving
+                    local target = nil
+                    if other_joker.ability.name == 'Blueprint' then
+                        for i = 1, #G.jokers.cards do
+                            if G.jokers.cards[i] == other_joker then target = G.jokers.cards[i+1]; break end
+                        end
+                    elseif other_joker.ability.name == 'Brainstorm' then
+                        target = G.jokers.cards[1]
+                    end
+                    if target == self then return nil end
+
+                    local local_context = {}
+                    for k, v in pairs(context) do local_context[k] = v end
+                    local_context.blueprint = (local_context.blueprint and (local_context.blueprint + 1)) or 1
+                    local_context.blueprint_card = local_context.blueprint_card or self
+                    if local_context.blueprint > #G.jokers.cards + 1 then return nil end
+                    local other_joker_ret = other_joker:calculate_joker(local_context)
+                    if other_joker_ret then
+                        local halved_ret = {}
+                        local factor = (self.ability.extra or 0.5)
+                        for k, v in pairs(other_joker_ret) do
+                            local is_num = (type(v) == 'number') or (type(v) == 'table' and ((v.e and v.m) or (v.array and v.sign)))
+                            if is_num then
+                                if k == 'Xmult_mod' or k == 'Xchips_mod' then
+                                    halved_ret[k] = lenient_bignum((to_big(v) - to_big(1)) * factor + to_big(1))
+                                elseif k == 'repetitions' then
+                                    local temp = to_big(v) * factor
+                                    halved_ret[k] = to_number(type(temp) == 'table' and temp.ceil and temp:ceil() or math.ceil(temp))
+                                else
+                                    local temp = to_big(v) * factor
+                                    halved_ret[k] = lenient_bignum(type(temp) == 'table' and temp.ceil and temp:ceil() or math.ceil(temp))
+                                end
+                            elseif k ~= 'message' then
+                                halved_ret[k] = v
+                            end
+                        end
+                        -- Build message if we have common mods
+                        if halved_ret.mult_mod then halved_ret.message = localize{type='variable',key='a_mult',vars={halved_ret.mult_mod}}
+                        elseif halved_ret.chip_mod then halved_ret.message = localize{type='variable',key='a_chips',vars={halved_ret.chip_mod}}
+                        elseif halved_ret.Xmult_mod then halved_ret.message = localize{type='variable',key='a_xmult',vars={halved_ret.Xmult_mod}}
+                        elseif halved_ret.Xchips_mod then halved_ret.message = localize{type='variable',key='a_xchips',vars={halved_ret.Xchips_mod}}
+                        elseif other_joker_ret.message then 
+                            halved_ret.message = other_joker_ret.message
+                        end
+                        return halved_ret
+                    end
+                end
+                return nil
+            end
+
+            local ret_left = copy_and_halve(left_joker)
+            local ret_right = copy_and_halve(right_joker)
+            
+            if ret_left and ret_right then
+                -- Trigger visual for first
+                card_eval_status_text(context.blueprint_card or self, 'extra', nil, nil, nil, {message = ret_left.message, colour = G.C.GREEN})
+                
+                -- Merge right into left for the return
+                for k, v in pairs(ret_right) do
+                    if k == 'Xmult_mod' or k == 'Xchips_mod' then
+                        ret_left[k] = lenient_bignum(to_big(ret_left[k] or 1) * to_big(v))
+                    elseif (type(v) == 'number') or (type(v) == 'table' and ((v.e and v.m) or (v.array and v.sign))) then
+                        if k == 'repetitions' then
+                            ret_left[k] = to_number(to_big(ret_left[k] or 0) + to_big(v))
+                        else
+                            ret_left[k] = lenient_bignum(to_big(ret_left[k] or 0) + to_big(v))
+                        end
+                    end
+                end
+
+                -- Show right message as the second sequential message
+                ret_left.message = ret_right.message
+                
+                ret_left.card = context.blueprint_card or self
+                ret_left.colour = G.C.GREEN
+                if context.blueprint_card then context.blueprint_card:juice_up() else self:juice_up() end
+                return ret_left
+            elseif ret_left then
+                if ret_left.repetitions then ret_left.repetitions = to_number(ret_left.repetitions) end
+                ret_left.card = context.blueprint_card or self
+                ret_left.colour = G.C.GREEN
+                if context.blueprint_card then context.blueprint_card:juice_up() else self:juice_up() end
+                return ret_left
+            elseif ret_right then
+                if ret_right.repetitions then ret_right.repetitions = to_number(ret_right.repetitions) end
+                ret_right.card = context.blueprint_card or self
+                ret_right.colour = G.C.GREEN
+                if context.blueprint_card then context.blueprint_card:juice_up() else self:juice_up() end
+                return ret_right
             end
         end
         if context.open_booster then
@@ -4469,19 +4585,49 @@ function Card:update(dt)
                 end
             end
         end
-        if self.ability.name == 'Blueprint' or self.ability.name == 'Brainstorm' then
+        if self.ability.name == 'Blueprint' or self.ability.name == 'Brainstorm' or self.ability.name == 'Boilerplate' then
             local other_joker = nil
+            local other_joker_2 = nil
             if self.ability.name == 'Brainstorm' then
                 other_joker = G.jokers.cards[1]
             elseif self.ability.name == 'Blueprint' then
                 for i = 1, #G.jokers.cards do
                     if G.jokers.cards[i] == self then other_joker = G.jokers.cards[i+1] end
                 end
+            elseif self.ability.name == 'Boilerplate' then
+                for i = 1, #G.jokers.cards do
+                    if G.jokers.cards[i] == self then 
+                        other_joker = G.jokers.cards[i-1]
+                        other_joker_2 = G.jokers.cards[i+1]
+                    end
+                end
             end
-            if other_joker and other_joker ~= self and other_joker.config.center.blueprint_compat then
-                self.ability.blueprint_compat = 'compatible'
+
+            if self.ability.name == 'Boilerplate' then
+                local c1 = (other_joker and other_joker ~= self and other_joker.config.center.blueprint_compat) and true or false
+                local c2 = (other_joker_2 and other_joker_2 ~= self and other_joker_2.config.center.blueprint_compat) and true or false
+                local n1 = (other_joker and other_joker ~= self) and true or false
+                local n2 = (other_joker_2 and other_joker_2 ~= self) and true or false
+
+                if n1 and n2 then
+                    if c1 and c2 then self.ability.blueprint_compat = 'compatible'
+                    elseif c1 or c2 then self.ability.blueprint_compat = 'warn'
+                    else self.ability.blueprint_compat = 'incompatible' end
+                elseif n1 then
+                    if c1 then self.ability.blueprint_compat = 'compatible'
+                    else self.ability.blueprint_compat = 'incompatible' end
+                elseif n2 then
+                    if c2 then self.ability.blueprint_compat = 'compatible'
+                    else self.ability.blueprint_compat = 'incompatible' end
+                else
+                    self.ability.blueprint_compat = 'incompatible'
+                end
             else
-                self.ability.blueprint_compat = 'incompatible'
+                if other_joker and other_joker ~= self and other_joker.config.center.blueprint_compat then
+                    self.ability.blueprint_compat = 'compatible'
+                else
+                    self.ability.blueprint_compat = 'incompatible'
+                end
             end
         end
         if self.ability.name == 'Swashbuckler' then

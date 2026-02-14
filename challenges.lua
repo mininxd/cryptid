@@ -745,8 +745,10 @@ G.CHALLENGES = {
             }
         },
         jokers = {
-        {id = 'j_zombie_joker'},
-        {id = 'j_lithograph'},
+        {id = 'j_blueprint'},
+        {id = 'j_boilerplate'},
+        {id = 'j_brainstorm'},
+        {id = 'j_stuntman'},
         },
         consumeables = {
         },

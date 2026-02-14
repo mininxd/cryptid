@@ -1890,14 +1890,22 @@ return {
                 name="Zombie Joker",
                 text={
                     "Instead of losing, give {C:blue}+#1#{}",
-                    "{C:blue}hand{} & add {C:money}#2#{} random",
-                    "{C:money}Cards{} to {C:money}Hand{}"
+                    "hand & add {C:money}#2#{} random",
+                    "{C:orange}Cards{} to {C:orange}Hand{}"
                 },
             },
             j_lithograph={
                 name="Lithograph",
                 text={
                     "{C:money}Stone Cards{} give {C:red}+#1#{} Mult",
+                },
+            },
+            j_boilerplate={
+                name="Boilerplate",
+                text={
+                    "Copies the effect of both",
+                    "adjacent {C:orange}Jokers{}, but with",
+                    "halved effects"
                 },
             },
             j_super_joker={
