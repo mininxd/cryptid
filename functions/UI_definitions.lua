@@ -6812,3 +6812,7 @@ function G.UIDEF.sandbox_joker_selector()
         {n=G.UIT.R, config={align = "cm", r = 0.1, colour = G.C.BLACK, emboss = 0.05}, nodes=deck_tables},
         {n=G.UIT.R, config={align = "cm"}, nodes={
           create_option_cycle({options = joker_options, w = 4.5, cycle_shoulders = true, opt_callback = 'sandbox_joker_page', current_option = 1, colour = G.C.RED, no_pips = true, focus_args = {snap_to = true, nav = 'wide'}})
+        }}
+    }})
+  return t
+end
