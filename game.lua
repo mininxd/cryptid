@@ -1397,7 +1397,11 @@ function Game:sandbox()
         tilt = 1,
         card_size = 1,
         base_size = {w = G.CARD_W, h = G.CARD_H},
-        gamespeed = 0
+        gamespeed = 0,
+        joker_slots = '5',
+        consumable_slots = '2',
+        hands = '4',
+        discards = '3',
     }
 
     if G.SPLASH_FRONT then G.SPLASH_FRONT:remove(); G.SPLASH_FRONT = nil end
@@ -1439,6 +1443,19 @@ function Game:sandbox()
         G.FUNCS.rem_joker = function(e) if G.SANDBOX.joker then G.SANDBOX.joker:remove(); G.SANDBOX.joker = nil end end 
         G.FUNCS.do_time = function(args) if args.to_val == 'PLAY' then G.SANDBOX.gamespeed = 1 else G.SANDBOX.gamespeed = 0 end end
         G.FUNCS.cb = function(rt) G.CARD_W = rt.ref_table[rt.ref_value]*G.SANDBOX.base_size.w; G.CARD_H = rt.ref_table[rt.ref_value]*G.SANDBOX.base_size.h end
+
+        G.FUNCS.sandbox_update_params = function(e)
+          if G.GAME then
+            G.GAME.starting_params.joker_slots = tonumber(G.SANDBOX.joker_slots) or G.GAME.starting_params.joker_slots
+            G.GAME.starting_params.consumable_slots = tonumber(G.SANDBOX.consumable_slots) or G.GAME.starting_params.consumable_slots
+            G.GAME.starting_params.hands = tonumber(G.SANDBOX.hands) or G.GAME.starting_params.hands
+            G.GAME.starting_params.discards = tonumber(G.SANDBOX.discards) or G.GAME.starting_params.discards
+            
+            if G.jokers then G.jokers.config.card_limit = G.GAME.starting_params.joker_slots end
+            if G.consumeables then G.consumeables.config.card_limit = G.GAME.starting_params.consumable_slots end
+          end
+        end
+
         G.E_MANAGER:add_event(Event({
             func = (function()
                 G.SANDBOX.file_reload_timer = (G.SANDBOX.file_reload_timer or 0)
@@ -1453,19 +1470,37 @@ function Game:sandbox()
       
         local t = {
           n=G.UIT.ROOT, config = {align = "cm",colour = G.C.CLEAR}, nodes={   
-            {n=G.UIT.R, config={align = "cm", padding = 0.05, r = 0.1, emboss = 0.1, colour = G.C.L_BLACK}, nodes={
-              create_slider({label = 'Time', w = 2, h = 0.3, text_scale = 0.2, label_scale = 0.3, ref_table = G.SANDBOX, ref_value = 'vort_time', min = 0, max = 30}),
-              create_option_cycle({options = {'PLAY','PAUSE'}, opt_callback = 'do_time', current_option = 1, colour = G.C.RED, w = 2, scale = 0.7}),
-              create_slider({label = 'tilt', w = 2, h = 0.3, text_scale = 0.2, label_scale = 0.3, ref_table = G.SANDBOX, ref_value = 'tilt', min = 0, max = 3, decimal_places = 2}),
-              create_slider({label = 'Card size', w = 2, h = 0.3, text_scale = 0.2, label_scale = 0.3, ref_table = G.SANDBOX, ref_value = 'card_size', min = 0.1, max = 3, callback = 'cb', decimal_places = 2}),
-              create_option_cycle({options = G.SANDBOX.col_op, opt_callback = 'col1change', current_option = 1, colour = G.C.RED, w = 2, scale = 0.7}),
-              create_option_cycle({options = G.SANDBOX.col_op, opt_callback = 'col2change', current_option = 2, colour = G.C.RED, w = 2, scale = 0.7}),
-              {n=G.UIT.R, config={align = "cm", padding = 0.05}, nodes = {
-                UIBox_button{ label = {"+"}, button = "spawn_joker", minw = 0.7, col = true},
-                create_text_input({prompt_text = 'Joker key', extended_corpus = true, ref_table = G.SANDBOX, ref_value = 'joker_text', text_scale = 0.3, w = 1.5, h = 0.6}),
-                UIBox_button{ label = {"-"}, button = "rem_joker", minw = 0.7, col = true},
+            {n=G.UIT.C, config={align = "cm", padding = 0.05, r = 0.1, emboss = 0.1, colour = G.C.L_BLACK}, nodes={
+              {n=G.UIT.R, config={align = "cm"}, nodes={
+                create_slider({label = 'Time', w = 1.5, h = 0.3, text_scale = 0.2, label_scale = 0.3, ref_table = G.SANDBOX, ref_value = 'vort_time', min = 0, max = 30}),
+                create_option_cycle({options = {'PLAY','PAUSE'}, opt_callback = 'do_time', current_option = 1, colour = G.C.RED, w = 1.2, scale = 0.6}),
               }},
-              create_option_cycle({options = {'base', 'foil', 'holo', 'polychrome','negative'}, opt_callback = 'edition_change', current_option = 1, colour = G.C.RED, w = 2, scale = 0.7}),
+              {n=G.UIT.R, config={align = "cm"}, nodes={
+                create_slider({label = 'tilt', w = 1.5, h = 0.3, text_scale = 0.2, label_scale = 0.3, ref_table = G.SANDBOX, ref_value = 'tilt', min = 0, max = 3, decimal_places = 2}),
+                create_slider({label = 'size', w = 1.5, h = 0.3, text_scale = 0.2, label_scale = 0.3, ref_table = G.SANDBOX, ref_value = 'card_size', min = 0.1, max = 3, callback = 'cb', decimal_places = 2}),
+              }},
+              {n=G.UIT.R, config={align = "cm"}, nodes={
+                create_option_cycle({options = G.SANDBOX.col_op, opt_callback = 'col1change', current_option = 1, colour = G.C.RED, w = 1.5, scale = 0.6}),
+                create_option_cycle({options = G.SANDBOX.col_op, opt_callback = 'col2change', current_option = 2, colour = G.C.RED, w = 1.5, scale = 0.6}),
+              }},
+              {n=G.UIT.R, config={align = "cm", padding = 0.05}, nodes = {
+                UIBox_button{ label = {"+"}, button = "spawn_joker", minw = 0.6, col = true, scale = 0.4},
+                create_text_input({prompt_text = 'Joker key', extended_corpus = true, ref_table = G.SANDBOX, ref_value = 'joker_text', text_scale = 0.25, w = 1.2, h = 0.5}),
+                UIBox_button{ label = {"-"}, button = "rem_joker", minw = 0.6, col = true, scale = 0.4},
+              }},
+              {n=G.UIT.R, config={align = "cm"}, nodes={
+                create_option_cycle({options = {'base', 'foil', 'holo', 'polychrome','negative'}, opt_callback = 'edition_change', current_option = 1, colour = G.C.RED, w = 2, scale = 0.6}),
+              }},
+              {n=G.UIT.R, config={align = "cm", padding = 0.02}, nodes={
+                {n=G.UIT.T, config={text = 'Slots J/C', scale = 0.2, colour = G.C.UI.TEXT_LIGHT}},
+                create_text_input({w = 0.6, h = 0.4, max_length = 2, ref_table = G.SANDBOX, ref_value = 'joker_slots', text_scale = 0.2, callback = 'sandbox_update_params'}),
+                create_text_input({w = 0.6, h = 0.4, max_length = 2, ref_table = G.SANDBOX, ref_value = 'consumable_slots', text_scale = 0.2, callback = 'sandbox_update_params'}),
+              }},
+              {n=G.UIT.R, config={align = "cm", padding = 0.02}, nodes={
+                {n=G.UIT.T, config={text = 'H/D', scale = 0.2, colour = G.C.UI.TEXT_LIGHT}},
+                create_text_input({w = 0.6, h = 0.4, max_length = 2, ref_table = G.SANDBOX, ref_value = 'hands', text_scale = 0.2, callback = 'sandbox_update_params'}),
+                create_text_input({w = 0.6, h = 0.4, max_length = 2, ref_table = G.SANDBOX, ref_value = 'discards', text_scale = 0.2, callback = 'sandbox_update_params'}),
+              }}
             }}
           }}
         return t

@@ -6736,31 +6736,44 @@ function G.UIDEF.sandbox_setup()
 
   local t = {n=G.UIT.ROOT, config={align = "cm", colour = G.C.CLEAR, minh = 6.6, minw = 6}, nodes={
     {n=G.UIT.C, config={align = "cm", padding = 0.1, r = 0.1, emboss = 0.1, colour = G.C.L_BLACK}, nodes={
-
         {n=G.UIT.R, config={align = "cm", padding = 0.1}, nodes={
-            {n=G.UIT.T, config={text = localize('b_joker_slots'), scale = 0.4, colour = G.C.UI.TEXT_LIGHT}},
+            {n=G.UIT.T, config={text = localize('b_sandbox'), scale = 0.6, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
         }},
-        create_text_input({w = 3, max_length = 3, prompt_text = localize('b_joker_slots'), ref_table = G.SANDBOX_PARAMS, ref_value = 'joker_slots', keyboard_offset = 1}),
 
-        {n=G.UIT.R, config={align = "cm", padding = 0.1}, nodes={
-            {n=G.UIT.T, config={text = localize('b_consumable_slots'), scale = 0.4, colour = G.C.UI.TEXT_LIGHT}},
+        {n=G.UIT.R, config={align = "cm", padding = 0.05}, nodes={
+            {n=G.UIT.C, config={align = "cl", minw = 3.5}, nodes={
+                {n=G.UIT.T, config={text = localize('b_joker_slots'), scale = 0.35, colour = G.C.UI.TEXT_LIGHT}},
+            }},
+            create_text_input({w = 2, max_length = 3, prompt_text = localize('b_joker_slots'), ref_table = G.SANDBOX_PARAMS, ref_value = 'joker_slots', keyboard_offset = 1}),
         }},
-        create_text_input({w = 3, max_length = 3, prompt_text = localize('b_consumable_slots'), ref_table = G.SANDBOX_PARAMS, ref_value = 'consumable_slots', keyboard_offset = 1}),
 
-        {n=G.UIT.R, config={align = "cm", padding = 0.1}, nodes={
-            {n=G.UIT.T, config={text = localize('b_hands'), scale = 0.4, colour = G.C.UI.TEXT_LIGHT}},
+        {n=G.UIT.R, config={align = "cm", padding = 0.05}, nodes={
+            {n=G.UIT.C, config={align = "cl", minw = 3.5}, nodes={
+                {n=G.UIT.T, config={text = localize('b_consumable_slots'), scale = 0.35, colour = G.C.UI.TEXT_LIGHT}},
+            }},
+            create_text_input({w = 2, max_length = 3, prompt_text = localize('b_consumable_slots'), ref_table = G.SANDBOX_PARAMS, ref_value = 'consumable_slots', keyboard_offset = 1}),
         }},
-        create_text_input({w = 3, max_length = 3, prompt_text = localize('b_hands'), ref_table = G.SANDBOX_PARAMS, ref_value = 'hands', keyboard_offset = 1}),
 
-        {n=G.UIT.R, config={align = "cm", padding = 0.1}, nodes={
-            {n=G.UIT.T, config={text = localize('b_discards'), scale = 0.4, colour = G.C.UI.TEXT_LIGHT}},
+        {n=G.UIT.R, config={align = "cm", padding = 0.05}, nodes={
+            {n=G.UIT.C, config={align = "cl", minw = 3.5}, nodes={
+                {n=G.UIT.T, config={text = localize('b_hands'), scale = 0.35, colour = G.C.UI.TEXT_LIGHT}},
+            }},
+            create_text_input({w = 2, max_length = 3, prompt_text = localize('b_hands'), ref_table = G.SANDBOX_PARAMS, ref_value = 'hands', keyboard_offset = 1}),
         }},
-        create_text_input({w = 3, max_length = 3, prompt_text = localize('b_discards'), ref_table = G.SANDBOX_PARAMS, ref_value = 'discards', keyboard_offset = 1}),
 
-        {n=G.UIT.R, config={align = "cm", padding = 0.1}, nodes={
-            {n=G.UIT.T, config={text = localize('b_dollars'), scale = 0.4, colour = G.C.UI.TEXT_LIGHT}},
+        {n=G.UIT.R, config={align = "cm", padding = 0.05}, nodes={
+            {n=G.UIT.C, config={align = "cl", minw = 3.5}, nodes={
+                {n=G.UIT.T, config={text = localize('b_discards'), scale = 0.35, colour = G.C.UI.TEXT_LIGHT}},
+            }},
+            create_text_input({w = 2, max_length = 3, prompt_text = localize('b_discards'), ref_table = G.SANDBOX_PARAMS, ref_value = 'discards', keyboard_offset = 1}),
         }},
-        create_text_input({w = 3, max_length = 5, prompt_text = localize('b_dollars'), ref_table = G.SANDBOX_PARAMS, ref_value = 'dollars', keyboard_offset = 1}),
+
+        {n=G.UIT.R, config={align = "cm", padding = 0.05}, nodes={
+            {n=G.UIT.C, config={align = "cl", minw = 3.5}, nodes={
+                {n=G.UIT.T, config={text = localize('b_dollars'), scale = 0.35, colour = G.C.UI.TEXT_LIGHT}},
+            }},
+            create_text_input({w = 2, max_length = 5, prompt_text = localize('b_dollars'), ref_table = G.SANDBOX_PARAMS, ref_value = 'dollars', keyboard_offset = 1}),
+        }},
 
         {n=G.UIT.R, config={align = "cm", padding = 0.2}, nodes={
             UIBox_button({button = 'start_sandbox_run', label = {localize('b_start_sandbox')}, minw = 5, scale = 0.5, colour = G.C.GREEN})
