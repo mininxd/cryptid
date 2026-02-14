@@ -5570,6 +5570,10 @@ function G.UIDEF.run_setup(from_game_over)
               tab_definition_function_args = from_game_over,
               chosen = _challenge_chosen
             } or nil,
+            G.STAGE == G.STAGES.MAIN_MENU and {
+              label = localize('b_sandbox'),
+              tab_definition_function = G.UIDEF.sandbox_setup,
+            } or nil,
         },
         snap_to_nav = true}),
       }},
@@ -6709,3 +6713,102 @@ function UIBox_button(args)
     but_UI_label
     }}}
 end
+
+function G.UIDEF.sandbox_setup()
+  if not G.SANDBOX_PARAMS then
+    G.SANDBOX_PARAMS = {
+        joker_slots = 5,
+        consumable_slots = 2,
+        hands = 4,
+        discards = 3,
+        dollars = "4",
+        starting_jokers = {},
+    }
+  end
+  if not G.SANDBOX_PARAMS.starting_jokers then G.SANDBOX_PARAMS.starting_jokers = {} end
+
+  local joker_slot_options = {}
+  for i = 0, 20 do joker_slot_options[i+1] = i end
+
+  local consumable_slot_options = {}
+  for i = 0, 10 do consumable_slot_options[i+1] = i end
+
+  local hand_options = {}
+  for i = 1, 10 do hand_options[i] = i end
+
+  local discard_options = {}
+  for i = 0, 10 do discard_options[i+1] = i end
+
+  local t = {n=G.UIT.ROOT, config={align = "cm", colour = G.C.CLEAR, minh = 6.6, minw = 6}, nodes={
+    {n=G.UIT.C, config={align = "cm", padding = 0.1, r = 0.1, emboss = 0.1, colour = G.C.L_BLACK}, nodes={
+        create_option_cycle({label = localize('b_joker_slots'), options = joker_slot_options, current_option = G.SANDBOX_PARAMS.joker_slots + 1, opt_callback = 'sandbox_change_joker_slots', colour = G.C.BLUE, w = 3}),
+        create_option_cycle({label = localize('b_consumable_slots'), options = consumable_slot_options, current_option = G.SANDBOX_PARAMS.consumable_slots + 1, opt_callback = 'sandbox_change_consumable_slots', colour = G.C.BLUE, w = 3}),
+        create_option_cycle({label = localize('b_hands'), options = hand_options, current_option = G.SANDBOX_PARAMS.hands, opt_callback = 'sandbox_change_hands', colour = G.C.BLUE, w = 3}),
+        create_option_cycle({label = localize('b_discards'), options = discard_options, current_option = G.SANDBOX_PARAMS.discards + 1, opt_callback = 'sandbox_change_discards', colour = G.C.RED, w = 3}),
+
+        {n=G.UIT.R, config={align = "cm", padding = 0.1}, nodes={
+            {n=G.UIT.T, config={text = localize('b_dollars'), scale = 0.4, colour = G.C.UI.TEXT_LIGHT}},
+        }},
+        create_text_input({w = 3, max_length = 5, prompt_text = localize('b_dollars'), ref_table = G.SANDBOX_PARAMS, ref_value = 'dollars', keyboard_offset = 1}),
+
+        {n=G.UIT.R, config={align = "cm", padding = 0.1}, nodes={
+            UIBox_button({button = 'sandbox_open_joker_selector', label = {localize('b_select_jokers')}, minw = 4, scale = 0.4, colour = G.C.ORANGE})
+        }},
+
+        {n=G.UIT.R, config={align = "cm", padding = 0.2}, nodes={
+            UIBox_button({button = 'start_sandbox_run', label = {localize('b_start_sandbox')}, minw = 5, scale = 0.5, colour = G.C.GREEN})
+        }}
+    }}
+  }}
+  return t
+end
+
+function G.UIDEF.sandbox_joker_selector()
+  local deck_tables = {}
+
+  G.sandbox_joker_collection = {}
+  for j = 1, 3 do
+    G.sandbox_joker_collection[j] = CardArea(
+      G.ROOM.T.x + 0.2*G.ROOM.T.w/2,G.ROOM.T.h,
+      5*G.CARD_W,
+      0.95*G.CARD_H,
+      {card_limit = 5, type = 'title', highlight_limit = 0, collection = true})
+    table.insert(deck_tables,
+    {n=G.UIT.R, config={align = "cm", padding = 0.07, no_fill = true}, nodes={
+      {n=G.UIT.O, config={object = G.sandbox_joker_collection[j]}}
+    }}
+    )
+  end
+
+  local joker_options = {}
+  for i = 1, math.ceil(#G.P_CENTER_POOLS.Joker/(5*#G.sandbox_joker_collection)) do
+    table.insert(joker_options, localize('k_page')..' '..tostring(i)..'/'..tostring(math.ceil(#G.P_CENTER_POOLS.Joker/(5*#G.sandbox_joker_collection))))
+  end
+
+  for i = 1, 5 do
+    for j = 1, #G.sandbox_joker_collection do
+      local center = G.P_CENTER_POOLS["Joker"][i+(j-1)*5]
+      if center then
+        local card = Card(G.sandbox_joker_collection[j].T.x + G.sandbox_joker_collection[j].T.w/2, G.sandbox_joker_collection[j].T.y, G.CARD_W, G.CARD_H, nil, center)
+
+        -- Custom visual for selection - Always create, color based on state
+        local is_selected = G.SANDBOX_PARAMS.starting_jokers[center.key]
+        card.children.buy_button = UIBox{
+          definition = {n=G.UIT.ROOT, config = {align = 'cm', colour = G.C.CLEAR}, nodes={
+            {n=G.UIT.R, config={align = "cm", padding = 0.05, r = 0.1, colour = is_selected and G.C.GREEN or G.C.BLACK, emboss = 0.05}, nodes={
+              {n=G.UIT.T, config={text = localize('k_active'), scale = 0.3, colour = G.C.WHITE, shadow = true}}
+            }}
+          }},
+          config = {align="tm", offset = {x=0,y=-0.2}, parent = card}
+        }
+
+        card.config = {center = center, button = 'sandbox_toggle_joker', ref_table = center}
+        G.sandbox_joker_collection[j]:emplace(card)
+      end
+    end
+  end
+
+  local t =  create_UIBox_generic_options({ back_func = 'sandbox_setup', contents = {
+        {n=G.UIT.R, config={align = "cm", r = 0.1, colour = G.C.BLACK, emboss = 0.05}, nodes=deck_tables},
+        {n=G.UIT.R, config={align = "cm"}, nodes={
+          create_option_cycle({options = joker_options, w = 4.5, cycle_shoulders = true, opt_callback = 'sandbox_joker_page', current_option = 1, colour = G.C.RED, no_pips = true, focus_args = {snap_to = true, nav = 'wide'}})

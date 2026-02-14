@@ -3348,3 +3348,87 @@ G.FUNCS.wipe_off = function()
     end
   }))
 end
+
+G.FUNCS.sandbox_change_joker_slots = function(args)
+  if G.SANDBOX_PARAMS then
+    G.SANDBOX_PARAMS.joker_slots = args.to_val
+  end
+end
+
+G.FUNCS.sandbox_change_consumable_slots = function(args)
+  if G.SANDBOX_PARAMS then
+    G.SANDBOX_PARAMS.consumable_slots = args.to_val
+  end
+end
+
+G.FUNCS.sandbox_change_hands = function(args)
+  if G.SANDBOX_PARAMS then
+    G.SANDBOX_PARAMS.hands = args.to_val
+  end
+end
+
+G.FUNCS.sandbox_change_discards = function(args)
+  if G.SANDBOX_PARAMS then
+    G.SANDBOX_PARAMS.discards = args.to_val
+  end
+end
+
+G.FUNCS.start_sandbox_run = function(e)
+  if G.OVERLAY_MENU then G.FUNCS.exit_overlay_menu() end
+
+  if G.SANDBOX_PARAMS then
+      local sandbox_args = copy_table(G.SANDBOX_PARAMS)
+      sandbox_args.dollars = tonumber(sandbox_args.dollars) or 4
+      G.FUNCS.start_run(e, {sandbox = sandbox_args})
+  end
+end
+
+G.FUNCS.sandbox_open_joker_selector = function(e)
+    if G.OVERLAY_MENU then G.FUNCS.exit_overlay_menu() end
+    G.FUNCS.overlay_menu{
+        definition = G.UIDEF.sandbox_joker_selector(),
+        config = {align="cm", offset = {x=0,y=0}, major = G.ROOM_ATTACH}
+    }
+end
+
+G.FUNCS.sandbox_toggle_joker = function(e)
+    local joker_key = e.config.ref_table.key
+    local is_selected = not G.SANDBOX_PARAMS.starting_jokers[joker_key]
+    G.SANDBOX_PARAMS.starting_jokers[joker_key] = is_selected or nil
+
+    if e.children.buy_button then
+        e.children.buy_button.UIRoot.children[1].config.colour = is_selected and G.C.GREEN or G.C.BLACK
+    end
+end
+
+G.FUNCS.sandbox_joker_page = function(args)
+  if not args or not args.cycle_config then return end
+  for j = 1, #G.sandbox_joker_collection do
+    for i = #G.sandbox_joker_collection[j].cards,1, -1 do
+      local c = G.sandbox_joker_collection[j]:remove_card(G.sandbox_joker_collection[j].cards[i])
+      c:remove()
+      c = nil
+    end
+  end
+  for i = 1, 5 do
+    for j = 1, #G.sandbox_joker_collection do
+      local center = G.P_CENTER_POOLS["Joker"][i+(j-1)*5 + (5*#G.sandbox_joker_collection*(args.cycle_config.current_option - 1))]
+      if not center then break end
+      local card = Card(G.sandbox_joker_collection[j].T.x + G.sandbox_joker_collection[j].T.w/2, G.sandbox_joker_collection[j].T.y, G.CARD_W, G.CARD_H, G.P_CARDS.empty, center)
+
+      -- Always create visual indication
+      local is_selected = G.SANDBOX_PARAMS.starting_jokers[center.key]
+      card.children.buy_button = UIBox{
+        definition = {n=G.UIT.ROOT, config = {align = 'cm', colour = G.C.CLEAR}, nodes={
+          {n=G.UIT.R, config={align = "cm", padding = 0.05, r = 0.1, colour = is_selected and G.C.GREEN or G.C.BLACK, emboss = 0.05}, nodes={
+            {n=G.UIT.T, config={text = localize('k_active'), scale = 0.3, colour = G.C.WHITE, shadow = true}}
+          }}
+        }},
+        config = {align="tm", offset = {x=0,y=-0.2}, parent = card}
+      }
+
+      card.config = {center = center, button = 'sandbox_toggle_joker', ref_table = center}
+      G.sandbox_joker_collection[j]:emplace(card)
+    end
+  end
+end

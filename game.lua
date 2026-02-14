@@ -2311,6 +2311,24 @@ function Game:start_run(args)
 
         self.GAME.selected_back:apply_to_run()
 
+        if args.sandbox then
+            if args.sandbox.joker_slots then self.GAME.starting_params.joker_slots = args.sandbox.joker_slots end
+            if args.sandbox.consumable_slots then self.GAME.starting_params.consumable_slots = args.sandbox.consumable_slots end
+            if args.sandbox.hands then self.GAME.starting_params.hands = args.sandbox.hands end
+            if args.sandbox.discards then self.GAME.starting_params.discards = args.sandbox.discards end
+            if args.sandbox.dollars then self.GAME.starting_params.dollars = args.sandbox.dollars end
+            if args.sandbox.starting_jokers then
+                for k, v in pairs(args.sandbox.starting_jokers) do
+                    G.E_MANAGER:add_event(Event({
+                        func = function()
+                            add_joker(k, nil, true)
+                            return true
+                        end
+                    }))
+                end
+            end
+        end
+
         if args.challenge then
             self.GAME.challenge = args.challenge.id
             self.GAME.challenge_tab = args.challenge
