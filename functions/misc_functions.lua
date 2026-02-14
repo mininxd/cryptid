@@ -1559,7 +1559,14 @@ function loc_colour(_c, _default)
     edition = G.C.EDITION,
     dark_edition = G.C.DARK_EDITION,
     legendary = G.C.RARITY[4],
-    enhanced = G.C.SECONDARY_SET.Enhanced
+    enhanced = G.C.SECONDARY_SET.Enhanced,
+    orange = G.C.ORANGE,
+    booster = G.C.BOOSTER,
+    grey = G.C.GREY,
+    joker = G.C.SET.Joker,
+    light_black = G.C.L_BLACK,
+    voucher = G.C.VOUCHER,
+    eternal = G.C.ETERNAL,
   }
   return G.ARGS.LOC_COLOURS[_c] or _default or G.C.BLACK
 end

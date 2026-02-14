@@ -8,6 +8,7 @@
 | Rugpull | **+8** at the end of round, sets money to **$0** when sold. | uncommon |
 | Zombie Joker | Instead of losing, gives **+1 Hand** and adds **5** random cards to hand. Destroyed at end of round if triggered. | uncommon |
 | Lithograph | **Stone Cards** give **+6 Mult**. | common |
+| Boilerplate | Copies the effect of both adjacent **Jokers**, but with halved effects. | rare |
 
 ## Custom Tags
 | Name        | Description | Type |
