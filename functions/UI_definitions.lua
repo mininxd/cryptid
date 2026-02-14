@@ -6717,34 +6717,38 @@ end
 function G.UIDEF.sandbox_setup()
   if not G.SANDBOX_PARAMS then
     G.SANDBOX_PARAMS = {
-        joker_slots = 5,
-        consumable_slots = 2,
-        hands = 4,
-        discards = 3,
+        joker_slots = "5",
+        consumable_slots = "2",
+        hands = "4",
+        discards = "3",
         dollars = "4",
         starting_jokers = {},
     }
   end
   if not G.SANDBOX_PARAMS.starting_jokers then G.SANDBOX_PARAMS.starting_jokers = {} end
 
-  local joker_slot_options = {}
-  for i = 0, 20 do joker_slot_options[i+1] = i end
-
-  local consumable_slot_options = {}
-  for i = 0, 10 do consumable_slot_options[i+1] = i end
-
-  local hand_options = {}
-  for i = 1, 10 do hand_options[i] = i end
-
-  local discard_options = {}
-  for i = 0, 10 do discard_options[i+1] = i end
-
   local t = {n=G.UIT.ROOT, config={align = "cm", colour = G.C.CLEAR, minh = 6.6, minw = 6}, nodes={
     {n=G.UIT.C, config={align = "cm", padding = 0.1, r = 0.1, emboss = 0.1, colour = G.C.L_BLACK}, nodes={
-        create_option_cycle({label = localize('b_joker_slots'), options = joker_slot_options, current_option = G.SANDBOX_PARAMS.joker_slots + 1, opt_callback = 'sandbox_change_joker_slots', colour = G.C.BLUE, w = 3}),
-        create_option_cycle({label = localize('b_consumable_slots'), options = consumable_slot_options, current_option = G.SANDBOX_PARAMS.consumable_slots + 1, opt_callback = 'sandbox_change_consumable_slots', colour = G.C.BLUE, w = 3}),
-        create_option_cycle({label = localize('b_hands'), options = hand_options, current_option = G.SANDBOX_PARAMS.hands, opt_callback = 'sandbox_change_hands', colour = G.C.BLUE, w = 3}),
-        create_option_cycle({label = localize('b_discards'), options = discard_options, current_option = G.SANDBOX_PARAMS.discards + 1, opt_callback = 'sandbox_change_discards', colour = G.C.RED, w = 3}),
+
+        {n=G.UIT.R, config={align = "cm", padding = 0.1}, nodes={
+            {n=G.UIT.T, config={text = localize('b_joker_slots'), scale = 0.4, colour = G.C.UI.TEXT_LIGHT}},
+        }},
+        create_text_input({w = 3, max_length = 3, prompt_text = localize('b_joker_slots'), ref_table = G.SANDBOX_PARAMS, ref_value = 'joker_slots', keyboard_offset = 1}),
+
+        {n=G.UIT.R, config={align = "cm", padding = 0.1}, nodes={
+            {n=G.UIT.T, config={text = localize('b_consumable_slots'), scale = 0.4, colour = G.C.UI.TEXT_LIGHT}},
+        }},
+        create_text_input({w = 3, max_length = 3, prompt_text = localize('b_consumable_slots'), ref_table = G.SANDBOX_PARAMS, ref_value = 'consumable_slots', keyboard_offset = 1}),
+
+        {n=G.UIT.R, config={align = "cm", padding = 0.1}, nodes={
+            {n=G.UIT.T, config={text = localize('b_hands'), scale = 0.4, colour = G.C.UI.TEXT_LIGHT}},
+        }},
+        create_text_input({w = 3, max_length = 3, prompt_text = localize('b_hands'), ref_table = G.SANDBOX_PARAMS, ref_value = 'hands', keyboard_offset = 1}),
+
+        {n=G.UIT.R, config={align = "cm", padding = 0.1}, nodes={
+            {n=G.UIT.T, config={text = localize('b_discards'), scale = 0.4, colour = G.C.UI.TEXT_LIGHT}},
+        }},
+        create_text_input({w = 3, max_length = 3, prompt_text = localize('b_discards'), ref_table = G.SANDBOX_PARAMS, ref_value = 'discards', keyboard_offset = 1}),
 
         {n=G.UIT.R, config={align = "cm", padding = 0.1}, nodes={
             {n=G.UIT.T, config={text = localize('b_dollars'), scale = 0.4, colour = G.C.UI.TEXT_LIGHT}},

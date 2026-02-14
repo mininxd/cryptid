@@ -3349,36 +3349,16 @@ G.FUNCS.wipe_off = function()
   }))
 end
 
-G.FUNCS.sandbox_change_joker_slots = function(args)
-  if G.SANDBOX_PARAMS then
-    G.SANDBOX_PARAMS.joker_slots = args.to_val
-  end
-end
-
-G.FUNCS.sandbox_change_consumable_slots = function(args)
-  if G.SANDBOX_PARAMS then
-    G.SANDBOX_PARAMS.consumable_slots = args.to_val
-  end
-end
-
-G.FUNCS.sandbox_change_hands = function(args)
-  if G.SANDBOX_PARAMS then
-    G.SANDBOX_PARAMS.hands = args.to_val
-  end
-end
-
-G.FUNCS.sandbox_change_discards = function(args)
-  if G.SANDBOX_PARAMS then
-    G.SANDBOX_PARAMS.discards = args.to_val
-  end
-end
-
 G.FUNCS.start_sandbox_run = function(e)
   if G.OVERLAY_MENU then G.FUNCS.exit_overlay_menu() end
 
   if G.SANDBOX_PARAMS then
       local sandbox_args = copy_table(G.SANDBOX_PARAMS)
       sandbox_args.dollars = tonumber(sandbox_args.dollars) or 4
+      sandbox_args.joker_slots = tonumber(sandbox_args.joker_slots) or 5
+      sandbox_args.consumable_slots = tonumber(sandbox_args.consumable_slots) or 2
+      sandbox_args.hands = tonumber(sandbox_args.hands) or 4
+      sandbox_args.discards = tonumber(sandbox_args.discards) or 3
       G.FUNCS.start_run(e, {sandbox = sandbox_args})
   end
 end
